@@ -1,0 +1,227 @@
+{
+  "entities": {
+    "Letter": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Letter",
+      "type": "object",
+      "description": "Represents a generated letter.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Letter entity."
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to Category. (Relationship: Category 1:N Letter)"
+        },
+        "generatedDate": {
+          "type": "string",
+          "description": "The date and time the letter was generated.",
+          "format": "date-time"
+        },
+        "letterContent": {
+          "type": "string",
+          "description": "The full content of the generated letter, including formatting."
+        },
+        "exportedPdfPath": {
+          "type": "string",
+          "description": "The file path or URL where the exported PDF is stored.",
+          "format": "uri"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Letter)"
+        }
+      },
+      "required": [
+        "id",
+        "categoryId",
+        "generatedDate",
+        "letterContent",
+        "userId"
+      ]
+    },
+    "Category": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Category",
+      "type": "object",
+      "description": "Represents a letter category (e.g., 'due', 'pf', 'hooking').",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Category entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the category (e.g., 'due', 'pf', 'hooking')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the category and its purpose."
+        },
+        "template": {
+          "type": "string",
+          "description": "The template used to generate letters for this category."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "template"
+      ]
+    },
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "username": {
+          "type": "string",
+          "description": "The username of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user.",
+          "format": "email"
+        },
+        "role": {
+            "type": "string",
+            "description": "The role of the user, e.g., 'admin' or 'user'.",
+            "enum": ["admin", "user"]
+        },
+        "status": {
+            "type": "string",
+            "description": "The status of the user account.",
+            "enum": ["active", "inactive"]
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "role",
+        "status"
+      ]
+    },
+    "Consumer": {
+      "title": "Consumer",
+      "description": "Represents a consumer with their account details.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The consumer's full name."
+        },
+        "guardian": {
+          "type": "string",
+          "description": "The name of the consumer's guardian."
+        },
+        "address": {
+          "type": "string",
+          "description": "The consumer's service address."
+        },
+        "mobile": {
+          "type": "string",
+          "description": "The consumer's mobile number."
+        },
+        "meterNo": {
+          "type": "string",
+          "description": "The consumer's meter number."
+        },
+        "tarrif": {
+          "type": "string",
+          "description": "The consumer's tariff plan."
+        }
+      },
+      "required": [
+        "name",
+        "address",
+        "meterNo"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles. Only the authenticated user can read/write their own profile.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/consumers/{consumerId}",
+        "definition": {
+          "entityName": "Consumer",
+          "schema": {
+            "$ref": "#/backend/entities/Consumer"
+          },
+          "description": "Stores all consumer data. The document ID should be the consumer's account number.",
+          "params": [
+            {
+              "name": "consumerId",
+              "description": "The consumer's unique account number."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/categories/{categoryId}",
+        "definition": {
+          "entityName": "Category",
+          "schema": {
+            "$ref": "#/backend/entities/Category"
+          },
+          "description": "Stores letter categories. Access can be controlled via role-based permissions (e.g., only admins can create/update categories).",
+          "params": [
+            {
+              "name": "categoryId",
+              "description": "The unique identifier of the category."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/letters/{letterId}",
+        "definition": {
+          "entityName": "Letter",
+          "schema": {
+            "$ref": "#/backend/entities/Letter"
+          },
+          "description": "Stores letters generated by the user. Includes denormalized 'categoryId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns the letter."
+            },
+            {
+              "name": "letterId",
+              "description": "The unique identifier of the letter."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to provide a secure and scalable solution for the GPBS-2 LetterGen application. It leverages path-based ownership for user-specific data and incorporates denormalization for authorization independence. This ensures that security rules can be enforced without relying on complex `get()` operations, which can hinder atomic operations and increase debugging complexity.\n\nThe primary data entities are `User`, `Category`, and `Letter`. User-related data is stored under `/users/{userId}`, ensuring only the authenticated user can access their specific data. Categories are stored in a top-level `/categories` collection. Letters, which are specific to a user and category, are stored in a subcollection under the user's document `/users/{userId}/letters/{letterId}`. The `categoryId` is stored on each `Letter` document.\n\nThis structure enforces Authorization Independence by avoiding hierarchical authorization dependencies. The letters subcollection leverages path-based ownership, ensuring only the user who owns the letters can access them. Each letter also stores the `categoryId` which allows access modeling based on the letter's category without needing to retrieve category data in rules.\n\nThe structure supports the required QAPs (Rules are not Filters) by segregating user-specific data. Listing letters is restricted to the user's subcollection, which enforces that the list operation only returns letters that the user owns. The categories collection is separate, enabling global access (if required) or role-based access for admin users to manage categories."
+  }
+}

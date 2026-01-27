@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 209 33% 91%; /* #E0E8EF */
+    --foreground: 205 63% 15%;
+    --card: 209 33% 97%;
+    --card-foreground: 205 63% 15%;
+    --popover: 209 33% 97%;
+    --popover-foreground: 205 63% 15%;
+    --primary: 205 63% 28%; /* #1A5276 */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 209 33% 85%;
+    --secondary-foreground: 205 63% 28%;
+    --muted: 209 33% 85%;
+    --muted-foreground: 209 49% 30%;
+    --accent: 209 49% 40%; /* #346E99 */
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 209 33% 80%;
+    --input: 209 33% 88%;
+    --ring: 209 49% 40%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 205 63% 10%;
+    --foreground: 210 40% 96%;
+    --card: 205 63% 15%;
+    --card-foreground: 210 40% 96%;
+    --popover: 205 63% 10%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 205 63% 28%;
+    --secondary: 209 33% 25%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 209 33% 25%;
+    --muted-foreground: 209 40% 70%;
+    --accent: 209 49% 50%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 209 33% 25%;
+    --input: 209 33% 25%;
+    --ring: 209 49% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area, .print-area * {
+    visibility: visible;
+  }
+
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  
+  #letterContent {
+    box-sizing: border-box; /* Ensures padding is included in height */
+    visibility: visible;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 210mm;
+    height: 250mm;
+    padding: 20mm 20mm 15mm 25mm;
+    margin: 0;
+    box-shadow: none;
+    border: none;
+    overflow: hidden; /* This will hide any content that overflows */
+  }
+
+  #application-preview, #application-preview * {
+    visibility: visible;
+  }
+
+  #application-preview {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 2cm;
+    box-shadow: none;
+    border: none;
+  }
+
+  .no-print-area {
+    display: none !important;
+  }
+  
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
