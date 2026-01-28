@@ -280,11 +280,11 @@ export function NewDashboard({
         
         #letterContent {
             width: 210mm;
-            height: 250mm;
+            height: 297mm;
             padding: 15mm 20mm 15mm 25mm;
             background: white;
             position: relative;
-            font-family: 'Nikosh', serif;
+            font-family: 'Nikosh', 'Times New Roman', serif;
             font-size: 15.5px;
             line-height: 1.6;
             color: #000;
@@ -309,7 +309,7 @@ export function NewDashboard({
             font-weight: bold;
             font-size: 1.3rem;
             line-height: 1;
-            text-align: center;
+            
         }
     
         #letterContent .header p {
@@ -451,7 +451,7 @@ export function NewDashboard({
       <div className="dashboard-body">
         <div className="no-print-area">
           <div style={{ textAlign: 'center', marginTop: 0, color: '#1a5276' }}>
-            <h1 style={{ display: 'inline-block', margin: 0, verticalAlign: 'middle' }}>
+            <h1 style={{ display: 'inline-block',fontSize: '48px', lineHeight: '1.2', margin: 0, verticalAlign: 'middle' }}>
             বিলিং শাখার পত্র ব্যবস্থাপনা সিস্টেম
             </h1>
           </div>
