@@ -1,35 +1,46 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ConsumerEditor } from '@/components/consumer-editor';
 import { toBanglaNumeral } from '@/lib/numeral-converter';
 
-interface ViewDatabaseClientProps {
-  consumers: any[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-  onPageChange: (newPage: number) => void;
+interface Consumer {
+  id: string;
+  accNo: string;
+  name: string;
+  guardian: string;
+  meterNo: string;
+  mobile: string;
+  address: string;
+  tarrif: string;
+  created_at: string;
 }
 
-export function ViewDatabaseClient({
-  consumers,
-  totalCount,
-  page,
-  pageSize,
-  onPageChange,
-}: ViewDatabaseClientProps) {
+interface ViewDatabaseClientProps {
+  initialConsumers: Consumer[];
+  pageSize?: number;
+}
+
+export function ViewDatabaseClient({ initialConsumers, pageSize = 20 }: ViewDatabaseClientProps) {
   const [selectedAccNo, setSelectedAccNo] = useState<string | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [page, setPage] = useState(1);
+  const [consumers, setConsumers] = useState<Consumer[]>([]);
 
-  const totalPages = Math.ceil(totalCount / pageSize);
+  const totalPages = Math.ceil(initialConsumers.length / pageSize);
+
+  useEffect(() => {
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    setConsumers(initialConsumers.slice(start, end));
+  }, [page, initialConsumers, pageSize]);
 
   const handleSuccess = () => {
-    setRefreshKey((prev) => prev + 1);
+    // Reload page on edit/save
+    window.location.reload();
   };
 
   return (
@@ -37,16 +48,14 @@ export function ViewDatabaseClient({
       <div className="max-w-7xl mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Database Viewer</h1>
-          <p className="text-muted-foreground">View and manage consumer records in SQLite database</p>
+          <p className="text-muted-foreground">View and manage all consumer records in SQLite database</p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>
-              Consumers ({toBanglaNumeral(totalCount.toString())})
-            </CardTitle>
+            <CardTitle>Consumers ({initialConsumers.length})</CardTitle>
             <CardDescription>
-              Records are paginated. Click Edit to modify or delete a record.
+              All consumer records stored in the database. Click Edit to modify or delete a record.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -65,7 +74,7 @@ export function ViewDatabaseClient({
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody key={refreshKey}>
+                <TableBody>
                   {consumers.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
@@ -73,30 +82,24 @@ export function ViewDatabaseClient({
                       </TableCell>
                     </TableRow>
                   ) : (
-                    consumers.map((consumer: any) => (
-                      <TableRow key={consumer.id}>
-                        <TableCell className="font-mono text-sm font-bangla">
-                          {toBanglaNumeral(consumer.accNo)}
-                        </TableCell>
-                        <TableCell>{consumer.name}</TableCell>
-                        <TableCell>{consumer.guardian}</TableCell>
-                        <TableCell className="font-bangla">
-                          {toBanglaNumeral(consumer.meterNo)}
-                        </TableCell>
-                        <TableCell className="font-bangla">
-                          {toBanglaNumeral(consumer.mobile)}
-                        </TableCell>
-                        <TableCell className="max-w-xs truncate">{consumer.address}</TableCell>
-                        <TableCell>{consumer.tarrif}</TableCell>
+                    consumers.map((c) => (
+                      <TableRow key={c.id}>
+                        <TableCell className="font-mono text-sm font-bangla">{toBanglaNumeral(c.accNo)}</TableCell>
+                        <TableCell>{c.name}</TableCell>
+                        <TableCell>{c.guardian}</TableCell>
+                        <TableCell className="font-bangla">{toBanglaNumeral(c.meterNo)}</TableCell>
+                        <TableCell className="font-bangla">{toBanglaNumeral(c.mobile)}</TableCell>
+                        <TableCell className="max-w-xs truncate">{c.address}</TableCell>
+                        <TableCell>{c.tarrif}</TableCell>
                         <TableCell className="text-xs text-muted-foreground">
-                          {new Date(consumer.created_at).toLocaleDateString()}
+                          {new Date(c.created_at).toLocaleDateString()}
                         </TableCell>
                         <TableCell className="text-right">
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => {
-                              setSelectedAccNo(consumer.accNo);
+                              setSelectedAccNo(c.accNo);
                               setIsEditorOpen(true);
                             }}
                           >
@@ -112,23 +115,21 @@ export function ViewDatabaseClient({
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="mt-4 flex justify-center gap-2">
+              <div className="flex justify-center items-center gap-2 mt-4">
                 <Button
                   size="sm"
-                  variant="outline"
-                  disabled={page <= 1}
-                  onClick={() => onPageChange(page - 1)}
+                  disabled={page === 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
                 >
                   Previous
                 </Button>
-                <span className="px-2 py-1 rounded border">
-                  Page {toBanglaNumeral(page.toString())} / {toBanglaNumeral(totalPages.toString())}
+                <span>
+                  Page {page} of {totalPages}
                 </span>
                 <Button
                   size="sm"
-                  variant="outline"
-                  disabled={page >= totalPages}
-                  onClick={() => onPageChange(page + 1)}
+                  disabled={page === totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 >
                   Next
                 </Button>

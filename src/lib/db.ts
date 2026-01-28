@@ -1,22 +1,29 @@
 import Database from 'better-sqlite3';
 import path from 'path';
+import fs from 'fs';
 
-const dbPath = path.join(process.cwd(), 'data', 'app.db');
+// Database file path
+const dbPath = path.resolve(process.cwd(), 'data', 'app.db');
 
 // Ensure the data directory exists
-import fs from 'fs';
 const dataDir = path.dirname(dbPath);
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
+// Use global variable to prevent multiple instances in dev (hot reload safe)
+declare global {
+  var __db: Database.Database | undefined;
+}
+
 let db: Database.Database;
 
 export function getDb(): Database.Database {
-  if (!db) {
-    db = new Database(dbPath);
-    db.pragma('journal_mode = WAL');
+  if (!global.__db) {
+    global.__db = new Database(dbPath);
+    global.__db.pragma('journal_mode = WAL');
   }
+  db = global.__db;
   return db;
 }
 
@@ -64,13 +71,12 @@ export function initializeDatabase() {
     )
   `);
 
-  // Normalize existing data on initialization
-  try {
-    const { normalizeExistingData } = require('./normalize-data');
-    normalizeExistingData();
-  } catch (e) {
-    // Migration is optional
-  }
+  // Optional: Normalize existing data
+  import('./normalize-data')
+    .then(({ normalizeExistingData }) => normalizeExistingData())
+    .catch(() => {
+      console.warn('Data normalization skipped');
+    });
 
   console.log('Database initialized successfully');
 }
@@ -78,5 +84,6 @@ export function initializeDatabase() {
 export function closeDb() {
   if (db) {
     db.close();
+    console.log('Database connection closed');
   }
 }
