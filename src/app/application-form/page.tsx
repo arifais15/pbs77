@@ -51,62 +51,50 @@ export default function ApplicationFormPage() {
     appType: "refund",
     tarrif: "",
   });
-
   const [generatedApp, setGeneratedApp] = useState<React.ReactNode | null>(null);
-  const [accNo, setAccNo] = useState<string | null>(null);
-
   const previewRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const [accNo, setAccNo] = useState<string | null>(null);
   const { data: consumer, isLoading: isSearching } = useConsumer(accNo);
 
-  // Handle input change
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  // Handle input changes
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
 
-    // For account number
     if (name === "accNo") {
-      if (value === "") {
-        setAppData(prev => ({
-          ...prev,
-          accNo: "",
-          custName: "",
-          fatherName: "",
-          meterNo: "",
-          mobileNo: "",
-          address: "",
-          tarrif: "",
-        }));
-        setAccNo(null);
-        return;
-      }
-
-      // Remove all non-digit characters
       const digitsOnly = value.replace(/\D/g, "");
+      setAppData(prev => ({ ...prev, accNo: value }));
 
       if (digitsOnly.length === 7) {
-        // Format as XXX-XXXX
         const formattedAccNo = `${digitsOnly.slice(0, 3)}-${digitsOnly.slice(3)}`;
         setAppData(prev => ({ ...prev, accNo: formattedAccNo }));
         setAccNo(formattedAccNo); // Trigger search
       } else {
-        setAppData(prev => ({ ...prev, accNo: value }));
         setAccNo(null);
-        if (digitsOnly.length > 0) {
-          toast({
-            variant: "destructive",
-            title: "ভুল হিসাব নম্বর",
-            description: "হিসাব নম্বর অবশ্যই ৭ সংখ্যার হতে হবে (উদাঃ 5202030)।",
-          });
-        }
       }
       return;
     }
 
-    // For other fields
     setAppData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Load consumer data when accNo changes
+  // Show toast if accNo is invalid after leaving input
+  const handleAccNoBlur = () => {
+    if (appData.accNo) {
+      const digitsOnly = appData.accNo.replace(/\D/g, "");
+      if (digitsOnly.length !== 7) {
+        toast({
+          variant: "destructive",
+          title: "ভুল হিসাব নম্বর",
+          description: "হিসাব নম্বর অবশ্যই ৭ সংখ্যার হতে হবে (উদাঃ 520-2030)।",
+        });
+      }
+    }
+  };
+
+  // Auto-fill consumer info when found
   useEffect(() => {
     if (consumer && consumer.name) {
       setAppData(prev => ({
@@ -125,7 +113,7 @@ export default function ApplicationFormPage() {
     }
   }, [consumer, toast]);
 
-  // Show toast if account number not found
+  // Show toast if account not found after search
   useEffect(() => {
     if (accNo && !isSearching && !consumer) {
       toast({
@@ -136,12 +124,10 @@ export default function ApplicationFormPage() {
     }
   }, [accNo, isSearching, consumer, toast]);
 
-  // Handle Select change
   const handleSelectChange = (value: AppType) => {
     setAppData(prev => ({ ...prev, appType: value }));
   };
 
-  // Generate Application Preview
   const generateApp = () => {
     const today = new Date().toLocaleDateString("bn-BD", {
       year: "numeric",
@@ -168,24 +154,26 @@ export default function ApplicationFormPage() {
         break;
       case "Install":
         subject = "বকেয়া বিদ্যুৎ বিল কিস্তিতে পরিশোধের অনুমতি প্রসঙ্গে আবেদন।";
-        content = `আমার হিসাব নম্বর ${accNoFormatted}। বিভিন্ন আর্থিক সীমাবদ্ধতার কারণে নির্ধারিত সময়ে বিদ্যুৎ বিল পরিশোধ করতে না পারায় বর্তমানে আমার নামে ..................মাসের .........................টাকা বকেয়া বিল জমা হয়েছে।\n\nবর্তমানে এককালীনভাবে সম্পূর্ণ বকেয়া বিল পরিশোধ করা আমার পক্ষে সম্ভব নয়। তবে আমি নিয়মিতভাবে কিস্তির মাধ্যমে বকেয়া বিল পরিশোধ করতে আগ্রহী এবং সক্ষম। এমতাবস্থায়, মানবিক বিবেচনায় আমাকে ........... কিস্তির মাধ্যমে উক্ত বকেয়া বিল পরিশোধের সুযোগ প্রদান করার জন্য আপনার সদয় অনুমোদন প্রার্থনা করছি।\nআজকে বকেয়া বিলের ........................টাকা পরিশোধ করতে ইচ্ছুক।\nআমি অঙ্গীকার করছি যে, অনুমোদিত কিস্তি অনুযায়ী নির্ধারিত সময়ের মধ্যে অবশিষ্ট্য সকল বকেয়া বিল পরিশোধ করব এবং ভবিষ্যতে নিয়মিতভাবে বিদ্যুৎ বিল পরিশোধ করব।`;
+        content = `আমার হিসাব নম্বর ${accNoFormatted}। বিভিন্ন আর্থিক সীমাবদ্ধতার কারণে নির্ধারিত সময়ে বিদ্যুৎ বিল পরিশোধ করতে না পারায় বর্তমানে আমার নামে .................. মাসের .........................টাকা বকেয়া বিল জমা হয়েছে।
+        
+বর্তমানে এককালীনভাবে সম্পূর্ণ বকেয়া বিল পরিশোধ করা আমার পক্ষে সম্ভব নয়। তবে আমি নিয়মিতভাবে কিস্তির মাধ্যমে বকেয়া বিল পরিশোধ করতে আগ্রহী এবং সক্ষম। এমতাবস্থায়, মানবিক বিবেচনায় আমাকে ........... কিস্তির মাধ্যমে উক্ত বকেয়া বিল পরিশোধের সুযোগ প্রদান করার জন্য আপনার সদয় অনুমোদন প্রার্থনা করছি।`;
         break;
       case "reconn":
         subject = "বকেয়া বিদ্যুৎ বিল কিস্তিতে পরিশোধ ও বিচ্ছিন্ন সংযোগ পুনঃসংযোগের অনুমতি প্রসঙ্গে আবেদন।";
-        content = `আমার  হিসাব নম্বর ${accNoFormatted}। বিভিন্ন আর্থিক সীমাবদ্ধতার কারণে নির্ধারিত সময়ে বিদ্যুৎ বিল পরিশোধ করতে না পারায় বর্তমানে আমার নামে .................. মাসের ......................... টাকা বকেয়া বিল জমা হয়েছে, যার পরিপ্রেক্ষিতে আমার বিদ্যুৎ সংযোগটি সাময়িকভাবে বিচ্ছিন্ন করা হয়েছে।\n\nবর্তমানে এককালীনভাবে সম্পূর্ণ বকেয়া বিল পরিশোধ করা আমার পক্ষে সম্ভব নয়। তবে আমি নিয়মিতভাবে কিস্তির মাধ্যমে বকেয়া বিল পরিশোধ করতে আগ্রহী ও সক্ষম। এমতাবস্থায়, মানবিক বিবেচনায় আমাকে ........... কিস্তির মাধ্যমে উক্ত বকেয়া বিল পরিশোধের সুযোগ প্রদান করার জন্য আপনার সদয় অনুমোদন প্রার্থনা করছি।\n\nএমতাবস্থায়, আজ বকেয়া বিলের বিপরীতে ........................ টাকা পরিশোধ করতে ইচ্ছুক।\n\nআমি অঙ্গীকার করছি যে, অনুমোদিত কিস্তি অনুযায়ী নির্ধারিত সময়ের মধ্যে অবশিষ্ট সকল বকেয়া বিল পরিশোধ করব এবং ভবিষ্যতে নিয়মিতভাবে বিদ্যুৎ বিল পরিশোধ করব।\nঅতএব, উপরোক্ত বিষয়াদি বিবেচনাপূর্বক কিস্তিতে বকেয়া বিল পরিশোধের অনুমতি প্রদানের পাশাপাশি আমার বিচ্ছিন্নকৃত বিদ্যুৎ সংযোগটি দ্রুত পুনঃসংযোগ প্রদানের জন্য প্রয়োজনীয় ব্যবস্থা গ্রহণে আপনার সদয় অনুমোদন কামনা করছি।`;
+        content = `আমার গ্রাহক নম্বর ${accNoFormatted}। বিভিন্ন আর্থিক সীমাবদ্ধতার কারণে নির্ধারিত সময়ে বিদ্যুৎ বিল পরিশোধ করতে না পারায় বর্তমানে আমার নামে .................. মাসের ......................... টাকা বকেয়া বিল জমা হয়েছে, যার পরিপ্রেক্ষিতে আমার বিদ্যুৎ সংযোগটি সাময়িকভাবে বিচ্ছিন্ন করা হয়েছে। বর্তমানে এককালীনভাবে সম্পূর্ণ বকেয়া বিল পরিশোধ করা আমার পক্ষে সম্ভব নয়। তবে আমি নিয়মিতভাবে কিস্তির মাধ্যমে বকেয়া বিল পরিশোধ করতে আগ্রহী ও সক্ষম। এমতাবস্থায়, মানবিক বিবেচনায় আমাকে ........... কিস্তির মাধ্যমে উক্ত বকেয়া বিল পরিশোধের সুযোগ প্রদান করার জন্য আপনার সদয় অনুমোদন প্রার্থনা করছি।`;
         break;
       case "check":
         subject = "মিটার বা ওয়্যারিং পরীক্ষার আবেদন।";
-        content = `আমার  হিসাব নম্বর ${accNoFormatted} এবং মিটার নং: ${meter}-এ বিগত কয়েক মাস যাবত অস্বাভাবিক বিদ্যুৎ বিল প্রদর্শিত হচ্ছে। আমার ধারণা মিটারে কোনো কারিগরি ত্রুটি থাকতে পারে। এমতাবস্থায় মিটারটি বা ইন্টারনাল ওয়্যারিং পরীক্ষা করার প্রয়োজনীয় ব্যবস্থা গ্রহণে আপনার সুমর্জি হয়।`;
+        content = `আমার গ্রাহক নম্বর ${accNoFormatted} এবং মিটার নং: ${meter}-এ বিগত কয়েক মাস যাবত অস্বাভাবিক বিদ্যুৎ বিল প্রদর্শিত হচ্ছে। আমার ধারণা মিটারে কোনো কারিগরি ত্রুটি থাকতে পারে। এমতাবস্থায় মিটারটি বা ইন্টারনাল ওয়ারিং পরীক্ষা করার প্রয়োজনীয় ব্যবস্থা গ্রহণে আপনার সুমর্জি হয়।`;
         break;
     }
 
     setGeneratedApp(
       <div
         id="application-preview"
-        className="bg-white p-8 rounded-lg shadow-lg min-h-[500px] overflow-auto text-black font-body print:shadow-none print:border-none"
+        className="bg-white p-8 rounded-lg shadow-lg aspect-[1/1.414] min-h-[500px] overflow-auto text-black font-body print:shadow-none print:border-none"
       >
-        <div className="text-[16px] leading-snug mb-4">
+        <div className="text-[17px] leading-snug mb-4">
           তারিখ: {today}
           <br />
           <br />
@@ -195,32 +183,37 @@ export default function ApplicationFormPage() {
           <br />
           গাজীপুর পল্লী বিদ্যুৎ সমিতি–২
           <br />
-          সদর অফিস, রাজেন্দ্রপুর, গাজীপুর।
+          সদর অফিস,রাজেন্দ্রপুর, গাজীপুর।
         </div>
 
         <div>
-          <div className="font-bold underline my-3 text-[16.5px]">
-            বিষয়: {subject}
-          </div>
-          <div className="text-justify text-[15.5px] leading-relaxed">
+          <div className="font-bold underline my-3 text-[17px]">বিষয়: {subject}</div>
+          <div className="text-justify text-[16px] leading-relaxed">
             <p>
               জনাব,<br />
               সবিনয় নিবেদন এই যে, আমি আপনার পল্লী বিদ্যুৎ সমিতির একজন নিয়মিত গ্রাহক। {content}
             </p>
             {appData.extraDesc && <p>{appData.extraDesc}</p>}
-            <p>অতএব, মহোদয়ের নিকট প্রার্থনা, বিষয়টি বিবেচনা করে প্রয়োজনীয় ব্যবস্থা গ্রহণে আপনার সুমর্জি হয়।</p>
+            <p>
+              অতএব, মহোদয়ের নিকট প্রার্থনা, বিষয়টি বিবেচনা করে প্রয়োজনীয় ব্যবস্থা গ্রহণে আপনার সুমর্জি হয়।
+            </p>
           </div>
         </div>
 
-        <div className="mt-5 text-[15px] leading-tight w-[250px]">
-          বিনীত নিবেদক,<br />
+        <div className="mt-5 text-[16px] leading-tight w-[250px]">
+          বিনীত নিবেদক,
           <br />
           <br />
-          -----------------------<br />
-          ({appData.custName || ".............."})<br />
-          পিতা/অভিভাবক: {appData.fatherName || ".............."}<br />
-          হিসাব নং: {enToBn(appData.accNo) || ".............."}<br />
-          ঠিকানা: {appData.address || ".............."}<br />
+          -----------------------
+          <br />
+          ({appData.custName || ".............."})
+          <br />
+          পিতা/অভিভাবক: {appData.fatherName || ".............."}
+          <br />
+          হিসাব নং: {enToBn(appData.accNo) || ".............."}
+          <br />
+          ঠিকানা: {appData.address || ".............."}
+          <br />
           মোবাইল: {enToBn(appData.mobileNo) || ".............."}
         </div>
       </div>
@@ -231,11 +224,12 @@ export default function ApplicationFormPage() {
     }, 100);
   };
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    window.print();
+  };
 
   return (
     <div className="p-4 sm:p-6 md:p-8 space-y-8">
-      {/* Back Button */}
       <div className="flex justify-end">
         <Button asChild>
           <Link href="/dashboard">
@@ -244,16 +238,18 @@ export default function ApplicationFormPage() {
         </Button>
       </div>
 
-      {/* Form Card */}
       <Card>
         <CardHeader>
           <CardTitle>আবেদন পত্র তৈরি করুন</CardTitle>
-          <CardDescription>প্রয়োজনীয় তথ্য দিয়ে আবেদন পত্র তৈরি করুন।</CardDescription>
+          <CardDescription>
+            প্রয়োজনীয় তথ্য দিয়ে আবেদন পত্র তৈরি করুন।
+          </CardDescription>
         </CardHeader>
+
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2 space-y-2">
-              <Label>আবেদনের ধরণ</Label>
+              <Label className="text-lg">আবেদনের ধরণ</Label>
               <Select
                 name="appType"
                 onValueChange={handleSelectChange}
@@ -263,58 +259,88 @@ export default function ApplicationFormPage() {
                   <SelectValue placeholder="Select an application type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="refund">নিরাপত্তা জামানত রিফান্ড/সমন্বয়</SelectItem>
+                  <SelectItem value="refund">
+                    নিরাপত্তা জামানত রিফান্ড/সমন্বয়
+                  </SelectItem>
                   <SelectItem value="shift">মিটার নিরাপদ স্থানে স্থানান্তর</SelectItem>
                   <SelectItem value="load">অনুমোদিত লোড বৃদ্ধি</SelectItem>
-                  <SelectItem value="Install">বকেয়া বিদ্যুৎ বিল কিস্তিতে পরিশোধ</SelectItem>
-                  <SelectItem value="reconn">বকেয়া বিদ্যুৎ বিল কিস্তিসহ পুনঃসংযোগ</SelectItem>
+                  <SelectItem value="Install">
+                    বকেয়া বিদ্যুৎ বিল কিস্তিতে পরিশোধের অনুমতি
+                  </SelectItem>
+                  <SelectItem value="reconn">বকেয়া বিল কিস্তিসহ পুনঃসংযোগ</SelectItem>
                   <SelectItem value="check">মিটার বা ওয়্যারিং পরীক্ষা</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2 relative">
-              <Label htmlFor="accNo">হিসাব নং</Label>
+              <Label htmlFor="accNo" className="text-lg">
+                হিসাব নং
+              </Label>
               <Input
                 id="accNo"
                 name="accNo"
                 value={appData.accNo}
                 onChange={handleInputChange}
+                onBlur={handleAccNoBlur}
                 placeholder="520-2030"
               />
-              {isSearching && (
-                <Loader2 className="absolute right-2 top-9 h-4 w-4 animate-spin" />
-              )}
+              {isSearching && <Loader2 className="absolute right-2 top-9 h-4 w-4 animate-spin" />}
             </div>
 
-            {/* Other input fields */}
             <div className="space-y-2">
-              <Label htmlFor="custName">আবেদনকারীর নাম</Label>
+              <Label htmlFor="custName" className="text-lg">
+                আবেদনকারীর নাম
+              </Label>
               <Input id="custName" name="custName" value={appData.custName} onChange={handleInputChange} />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="fatherName">পিতা/অভিভাবকের নাম</Label>
+              <Label htmlFor="fatherName" className="text-lg">
+                পিতা/অভিভাবকের নাম
+              </Label>
               <Input id="fatherName" name="fatherName" value={appData.fatherName} onChange={handleInputChange} />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="meterNo">মিটার নং</Label>
+              <Label htmlFor="meterNo" className="text-lg">
+                মিটার নং
+              </Label>
               <Input id="meterNo" name="meterNo" value={appData.meterNo} onChange={handleInputChange} />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="mobileNo">মোবাইল নং</Label>
+              <Label htmlFor="mobileNo" className="text-lg">
+                মোবাইল নং
+              </Label>
               <Input id="mobileNo" name="mobileNo" value={appData.mobileNo} onChange={handleInputChange} />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="tarrif">ট্যারিফ</Label>
+              <Label htmlFor="tarrif" className="text-lg">
+                ট্যারিফ
+              </Label>
               <Input id="tarrif" name="tarrif" value={appData.tarrif} disabled />
             </div>
+
             <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="address">ঠিকানা/গ্রাম</Label>
+              <Label htmlFor="address" className="text-lg">
+                ঠিকানা/গ্রাম
+              </Label>
               <Input id="address" name="address" value={appData.address} onChange={handleInputChange} />
             </div>
+
             <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="extraDesc">অতিরিক্ত বর্ণনা (সংক্ষিপ্ত লিখুন)</Label>
-              <Textarea id="extraDesc" name="extraDesc" value={appData.extraDesc} onChange={handleInputChange} rows={2} />
+              <Label htmlFor="extraDesc" className="text-lg">
+                অতিরিক্ত বর্ণনা (সংক্ষিপ্ত লিখুন)
+              </Label>
+              <Textarea
+                id="extraDesc"
+                name="extraDesc"
+                value={appData.extraDesc}
+                onChange={handleInputChange}
+                rows={2}
+              />
             </div>
           </div>
 
@@ -324,12 +350,13 @@ export default function ApplicationFormPage() {
         </CardContent>
       </Card>
 
-      {/* Preview Card */}
       {generatedApp && (
         <Card ref={previewRef}>
           <CardHeader>
             <CardTitle>Application Preview</CardTitle>
-            <CardDescription>আপনার তৈরি করা আবেদন পত্র। প্রিন্ট করতে পারেন।</CardDescription>
+            <CardDescription>
+              Your generated application form. You can print it from here.
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center">
             <div className="w-full max-w-[210mm]">{generatedApp}</div>
