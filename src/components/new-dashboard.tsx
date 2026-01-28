@@ -288,7 +288,6 @@ export function NewDashboard({
             font-size: 15.5px;
             line-height: 1.6;
             color: #000;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
             box-sizing: border-box;
         }
 
