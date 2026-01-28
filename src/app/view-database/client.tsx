@@ -9,14 +9,25 @@ import { toBanglaNumeral } from '@/lib/numeral-converter';
 
 interface ViewDatabaseClientProps {
   consumers: any[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  onPageChange: (newPage: number) => void;
 }
 
-export function ViewDatabaseClient({ consumers: initialConsumers }: ViewDatabaseClientProps) {
+export function ViewDatabaseClient({
+  consumers,
+  totalCount,
+  page,
+  pageSize,
+  onPageChange,
+}: ViewDatabaseClientProps) {
   const [selectedAccNo, setSelectedAccNo] = useState<string | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Force refresh of page data when consumer is saved/deleted
+  const totalPages = Math.ceil(totalCount / pageSize);
+
   const handleSuccess = () => {
     setRefreshKey((prev) => prev + 1);
   };
@@ -26,14 +37,16 @@ export function ViewDatabaseClient({ consumers: initialConsumers }: ViewDatabase
       <div className="max-w-7xl mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Database Viewer</h1>
-          <p className="text-muted-foreground">View and manage all consumer records in SQLite database</p>
+          <p className="text-muted-foreground">View and manage consumer records in SQLite database</p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Consumers ({initialConsumers.length})</CardTitle>
+            <CardTitle>
+              Consumers ({toBanglaNumeral(totalCount.toString())})
+            </CardTitle>
             <CardDescription>
-              All consumer records stored in the database. Click Edit to modify or delete a record.
+              Records are paginated. Click Edit to modify or delete a record.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -53,14 +66,14 @@ export function ViewDatabaseClient({ consumers: initialConsumers }: ViewDatabase
                   </TableRow>
                 </TableHeader>
                 <TableBody key={refreshKey}>
-                  {initialConsumers.length === 0 ? (
+                  {consumers.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                        No consumer records found. Upload a CSV file to add records.
+                        No consumer records found.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    initialConsumers.map((consumer: any) => (
+                    consumers.map((consumer: any) => (
                       <TableRow key={consumer.id}>
                         <TableCell className="font-mono text-sm font-bangla">
                           {toBanglaNumeral(consumer.accNo)}
@@ -97,9 +110,28 @@ export function ViewDatabaseClient({ consumers: initialConsumers }: ViewDatabase
               </Table>
             </div>
 
-            {initialConsumers.length > 0 && (
-              <div className="mt-4 text-sm text-muted-foreground">
-                Total records: <span className="font-semibold">{initialConsumers.length}</span>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-4 flex justify-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={page <= 1}
+                  onClick={() => onPageChange(page - 1)}
+                >
+                  Previous
+                </Button>
+                <span className="px-2 py-1 rounded border">
+                  Page {toBanglaNumeral(page.toString())} / {toBanglaNumeral(totalPages.toString())}
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={page >= totalPages}
+                  onClick={() => onPageChange(page + 1)}
+                >
+                  Next
+                </Button>
               </div>
             )}
           </CardContent>
