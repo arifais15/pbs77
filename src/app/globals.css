@@ -51,8 +51,7 @@ select {
   padding: 0.5rem 0.75rem;
   border-radius: var(--radius);
   border: 1px solid hsl(var(--border));
-  background-color: hsl(var(--input));
-  color: hsl(var(--foreground));
+  
   width: 100%;
   box-sizing: border-box;
   transition: border-color 0.2s, box-shadow 0.2s;
