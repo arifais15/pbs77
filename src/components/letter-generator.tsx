@@ -1,44 +1,54 @@
-
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore, useUser } from '@/firebase';
-import { collection, addDoc, query, where, getDocs, doc, deleteDoc, getDoc } from 'firebase/firestore';
+import { useUser } from '@/firebase';
+import { useConsumer, useCreateActivity, useActivities } from '@/hooks/use-database';
 import type { LetterActivity, LetterInputs } from '@/app/dashboard/actions';
 import { enToBn } from '@/lib/utils';
 import { NewDashboard } from './new-dashboard';
 import { UserActivityLog } from './user-activity-log';
-import { Loader2 } from 'lucide-react';
+
+// Default empty inputs
+const DEFAULT_INPUTS: LetterInputs = {
+  inName: '',
+  inAcc: '',
+  inMeter: '',
+  inGuardian: '',
+  inMobile: '',
+  inTarrif: '',
+  inSmarok: '577.04.26.',
+  inOffice: '',
+  inDate: '',
+  ikwh: '0',
+  ipeak: '0',
+  ioff: '0',
+  idueAmt: '0',
+  idueMon: '',
+};
+
+// Helper to ensure all inputs properties are defined
+const ensureInputs = (partial: Partial<LetterInputs>): LetterInputs => ({
+  ...DEFAULT_INPUTS,
+  ...partial,
+});
 
 export function LetterGenerator() {
   const { toast } = useToast();
-  const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
+  const [accNo, setAccNo] = useState<string | null>(null);
+  const { data: consumer, isLoading: isSearching } = useConsumer(accNo);
+  const { data: userActivities, refetch: refetchActivities } = useActivities({ createdBy: userEmail || undefined });
+  const [activityData, setActivityData] = useState<LetterActivity | null>(null);
+  const { createActivity: saveActivity } = useCreateActivity(activityData);
 
   const [letterType, setLetterType] = useState('due');
-  const [inputs, setInputs] = useState<LetterInputs>({
-    inName: '',
-    inAcc: '',
-    inMeter: '',
-    inGuardian: '',
-    inMobile: '',
-    inTarrif: '',
-    inSmarok: '৫৭৭.০৪.২৬.',
-    inOffice: '',
-    inDate: '',
-    ikwh: '0',
-    ipeak: '0',
-    ioff: '0',
-    idueAmt: '0',
-    idueMon: '',
-  });
+  const [inputs, setInputs] = useState<LetterInputs>(DEFAULT_INPUTS);
   const [showPreview, setShowPreview] = useState(false);
-  const previewRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -52,63 +62,76 @@ export function LetterGenerator() {
     }
   }, [user, isUserLoading]);
 
-  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  // Update form when consumer data is fetched
+  useEffect(() => {
+    if (consumer && consumer.name) {
+      setInputs(prev => ensureInputs({
+        ...prev,
+        inName: consumer.name || '',
+        inMeter: consumer.meterNo || '',
+        inOffice: consumer.address || '',
+        inGuardian: consumer.guardian || '',
+        inMobile: consumer.mobile || '',
+        inTarrif: consumer.tarrif || '',
+      }));
+      toast({
+        title: "গ্রাহক পাওয়া গেছে",
+        description: `${consumer.name} এর তথ্য লোড হয়েছে।`,
+      });
+    }
+  }, [consumer, toast]);
+
+  // Show error if consumer not found
+  useEffect(() => {
+    if (accNo && !isSearching && !consumer) {
+      toast({
+        variant: "destructive",
+        title: "গ্রাহক পাওয়া যায়নি",
+        description: `হিসাব নং ${accNo} এর কোনো তথ্য পাওয়া যায়নি।`,
+      });
+    }
+  }, [accNo, isSearching, consumer, toast]);
+
+  // Handle activity creation when activityData is set
+  useEffect(() => {
+    if (activityData) {
+      saveActivity().then(() => {
+        toast({
+          title: "Activity Logged",
+          description: "The letter generation has been saved.",
+        });
+        refetchActivities();
+        setActivityData(null);
+      }).catch((error) => {
+        console.error("Failed to save letter activity:", error);
+        toast({
+          variant: "destructive",
+          title: "Save Failed",
+          description: "Could not save the letter activity to the database.",
+        });
+        setActivityData(null);
+      });
+    }
+  }, [activityData, saveActivity, toast, refetchActivities]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
     
-    // Optimistically update the input field being typed in
     setInputs(prev => ({ ...prev, [id]: value }));
 
     if (id === 'inAcc') {
-        // Clear other fields if account number is cleared
-        if (value === '') {
-            setInputs(prev => ({
-                ...prev,
-                inName: '', inMeter: '', inOffice: '', inGuardian: '', inMobile: '', inTarrif: '', idueAmt: '0', idueMon: ''
-            }));
-            return;
-        }
+      if (value === '') {
+        setInputs(prev => ({
+          ...prev,
+          inName: '', inMeter: '', inOffice: '', inGuardian: '', inMobile: '', inTarrif: '', idueAmt: '0', idueMon: ''
+        }));
+        setAccNo(null);
+        return;
+      }
 
-        // Only search when the input looks like a valid account number
-        if (value.length > 4) {
-            setIsSearching(true);
-            try {
-                if (!firestore) {
-                    toast({ variant: "destructive", title: "Error", description: "Firestore is not available." });
-                    return;
-                }
-                // The document ID in Firestore should be the account number string
-                const docRef = doc(firestore, 'consumers', value);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const consumer = docSnap.data();
-                    setInputs(prev => ({
-                        ...prev,
-                        inName: consumer.name || '',
-                        inMeter: consumer.meterNo || '',
-                        inOffice: consumer.address || '',
-                        inGuardian: consumer.guardian || '',
-                        inMobile: consumer.mobile || '',
-                        inTarrif: consumer.tarrif || '',
-                    }));
-                    toast({
-                        title: "গ্রাহক পাওয়া গেছে",
-                        description: `${consumer.name} এর তথ্য লোড হয়েছে।`,
-                    });
-                } else {
-                    // Clear fields if no consumer is found for the given account number
-                     setInputs(prev => ({
-                        ...prev,
-                        inName: '', inMeter: '', inOffice: '', inGuardian: '', inMobile: '', inTarrif: '',
-                    }));
-                }
-            } catch (error) {
-                console.error("Error fetching consumer:", error);
-                toast({ variant: "destructive", title: "Search Error", description: "Could not fetch consumer data." });
-            } finally {
-                setIsSearching(false);
-            }
-        }
+      if (value.length > 4) {
+        setAccNo(value);
+      }
     }
   };
 
@@ -124,8 +147,8 @@ export function LetterGenerator() {
     }, 100);
 
     // Then, validate everything needed for saving the activity.
-    if (!firestore || !userEmail) {
-      toast({ variant: "destructive", title: "Save Error", description: "Could not connect to database or user not found. Preview is available but will not be saved." });
+    if (!userEmail) {
+      toast({ variant: "destructive", title: "Save Error", description: "User email not found. Preview is available but will not be saved." });
       return;
     }
     
@@ -139,27 +162,24 @@ export function LetterGenerator() {
     }
 
     const subjectText = document.querySelector(`#lType option[value="${letterType}"]`)?.textContent || '';
-    const generationDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD for checking
+    const generationDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
 
-    // --- Duplicate Check ---
-    const q = query(
-      collection(firestore, "letter-activities"),
-      where("accountNumber", "==", inputs.inAcc),
-      where("subject", "==", subjectText),
-      where("date", "==", generationDate)
+    // Check for duplicates in the activities list
+    const isDuplicate = userActivities?.some(activity => 
+      activity.accountNumber === inputs.inAcc &&
+      activity.subject === subjectText &&
+      activity.date === generationDate
     );
 
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
+    if (isDuplicate) {
       toast({
         title: "Duplicate Letter",
         description: "Preview generated. A new activity was not logged as it already exists for today.",
       });
-      return; // Stop execution if duplicate is found, but after showing the preview.
+      return;
     }
-    // --- End Duplicate Check ---
 
-    // If all checks pass, proceed to save the activity log.
+    // Save the activity
     const letterData: LetterActivity = {
       accountNumber: inputs.inAcc,
       consumerName: inputs.inName,
@@ -171,11 +191,8 @@ export function LetterGenerator() {
     };
 
     try {
-      await addDoc(collection(firestore, "letter-activities"), letterData);
-      toast({
-        title: "Activity Logged",
-        description: "The letter generation has been saved.",
-      });
+      // Set activity data which will trigger the hook
+      setActivityData(letterData);
     } catch (error) {
       console.error("Failed to save letter activity:", error);
       toast({
@@ -187,15 +204,14 @@ export function LetterGenerator() {
   }
 
   const handleEdit = (activity: LetterActivity) => {
-    // Gracefully handle older log entries that don't have formData
-    setInputs(activity.formData || {
+    setInputs(ensureInputs(activity.formData || {
         inName: activity.consumerName,
         inAcc: activity.accountNumber,
         inMeter: '',
         inGuardian: '',
         inMobile: '',
         inTarrif: '',
-        inSmarok: '৫৭৭.০৪.২৬.',
+        inSmarok: '577.04.26.',
         inOffice: '',
         inDate: activity.date,
         ikwh: '0',
@@ -203,66 +219,53 @@ export function LetterGenerator() {
         ioff: '0',
         idueAmt: '0',
         idueMon: '',
-    });
+    }));
+  }
 
-    setLetterType(activity.letterType || 'due');
-    setShowPreview(false); // Hide any existing preview
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    toast({
-      title: "Editing Letter",
-      description: `Loaded data for account ${activity.accountNumber}.`,
-    })
-  };
-  
-  const handleDeleteActivity = async (activityId: string) => {
-    if (!firestore) {
-      toast({ variant: "destructive", title: "Error", description: "Database not available." });
-      return;
-    }
-     if (!window.confirm(`Are you sure you want to delete this activity? This action cannot be undone.`)) {
+  const handleDeleteActivityOld = async (activityId: string) => {
+    if (!window.confirm('Are you sure you want to delete this activity?')) {
       return;
     }
 
     try {
-      await deleteDoc(doc(firestore, "letter-activities", activityId));
+      const response = await fetch(`/api/activities/${activityId}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete');
       toast({
         title: "Activity Deleted",
-        description: "The activity has been removed from your log.",
+        description: "The activity log has been removed.",
       });
+      refetchActivities();
     } catch (error) {
-      console.error("Failed to delete letter activity:", error);
       toast({
         variant: "destructive",
-        title: "Delete Failed",
-        description: "Could not delete the activity from the database.",
+        title: "Error",
+        description: "Failed to delete activity."
       });
     }
   }
 
-  if (!isClient || isUserLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <>
-      <NewDashboard
-        letterType={letterType}
-        inputs={inputs}
-        showPreview={showPreview}
-        previewRef={previewRef}
-        onLetterTypeChange={handleLetterTypeChange}
-        onInputChange={handleInputChange}
-        onGenerate={buildLetterAndSave}
-        isSearching={isSearching}
-      />
-      {!isAdmin && user && userEmail && (
-        <div className="mt-8">
-            <UserActivityLog userEmail={userEmail} onEdit={handleEdit} onDelete={handleDeleteActivity} />
-        </div>
+      {isClient ? (
+        <NewDashboard
+          letterType={letterType}
+          inputs={inputs}
+          showPreview={showPreview}
+          previewRef={previewRef}
+          onLetterTypeChange={handleLetterTypeChange}
+          onInputChange={handleInputChange}
+          onGenerate={buildLetterAndSave}
+          isSearching={isSearching}
+        />
+      ) : (
+        <div>Loading...</div>
+      )}
+      {isClient && userEmail && (
+        <UserActivityLog
+          userEmail={userEmail}
+          onEdit={handleEdit}
+          onDelete={handleDeleteActivityOld}
+        />
       )}
     </>
   );

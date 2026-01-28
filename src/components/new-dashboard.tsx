@@ -10,7 +10,7 @@ interface NewDashboardProps {
     letterType: string;
     inputs: LetterInputs;
     showPreview: boolean;
-    previewRef: React.RefObject<HTMLDivElement>;
+    previewRef: React.RefObject<HTMLDivElement | null>;
     onLetterTypeChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
     onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onGenerate: () => void;
@@ -63,7 +63,7 @@ export function NewDashboard({
 
         <div className="meta-row">
           <span>
-            স্মারক নং: ২৭.১২.৩৩৩০.<span id="outSmarok">{enToBn(inputs.inSmarok)}</span>
+            স্মারক নং: ২৭.১২.৩৩৩০.<span id="outSmarok">{inputs.inSmarok}</span>
           </span>
           <span>
             তারিখ: <span id="outDate">{bnDate}</span>
@@ -505,7 +505,7 @@ export function NewDashboard({
             </div>
             <div>
               <label>ট্যারিফ</label>
-              <input id="inTarrif" type="text" value={inputs.inTarrif} onChange={onInputChange} disabled />
+              <input id="inTarrif" type="text" value={inputs.inTarrif} onChange={onInputChange} />
             </div>
             <div>
               <label>স্মারক নং (শেষ অংশ)</label>

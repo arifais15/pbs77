@@ -10,8 +10,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['SolaimanLipi', 'sans-serif'],
-        headline: ['SolaimanLipi', 'sans-serif'],
+        body: ['Nikosh', 'SolaimanLipi', 'Noto Sans Devanagari', 'sans-serif'],
+        headline: ['Nikosh', 'SolaimanLipi', 'Noto Sans Devanagari', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {

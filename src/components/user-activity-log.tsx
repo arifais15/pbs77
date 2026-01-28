@@ -3,8 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
-import { collection, query, where, orderBy, limit } from 'firebase/firestore';
+import { useActivities, useDeleteActivity } from '@/hooks/use-database';
 import { Loader2, Pencil, Trash2 } from 'lucide-react';
 import type { LetterActivity } from '@/app/dashboard/actions';
 import { Button } from './ui/button';
@@ -23,19 +22,7 @@ interface ActivityLog extends LetterActivity {
 
 
 export function UserActivityLog({ userEmail, onEdit, onDelete }: UserActivityLogProps) {
-    const firestore = useFirestore();
-
-    const userActivityQuery = useMemoFirebase(() => {
-        if (!firestore || !userEmail) return null;
-        return query(
-            collection(firestore, "letter-activities"),
-            where("createdBy", "==", userEmail),
-            orderBy("date", "desc"),
-            limit(50)
-        );
-    }, [firestore, userEmail]);
-
-    const { data: userActivity, isLoading } = useCollection<ActivityLog>(userActivityQuery);
+    const { data: userActivity, isLoading } = useActivities({ createdBy: userEmail, limit: 50 });
 
     return (
         <Card>

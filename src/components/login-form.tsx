@@ -8,31 +8,49 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LogIn } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth, useFirestore } from '@/firebase';
+import { useAuth } from '@/firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, type User as AuthUser } from 'firebase/auth';
-import { collection, query, where, getDocs, setDoc, doc } from 'firebase/firestore';
 import type { User } from '@/lib/users';
 
 export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuth();
-  const firestore = useFirestore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const proceedToDashboard = async (authUser: AuthUser) => {
     try {
-        const q = query(collection(firestore, "users"), where("email", "==", authUser.email));
-        const querySnapshot = await getDocs(q);
+        const res = await fetch('/api/users/by-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: authUser.email }),
+        });
 
-        if (querySnapshot.empty) {
-            // This case should not happen if user creation is successful, but as a fallback.
-            throw new Error("User document not found in database.");
-        }
+        let userFromDb;
         
-        const userFromDb = querySnapshot.docs[0].data() as User;
+        if (!res.ok) {
+            // User doesn't exist in database, create them
+            const createRes = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: authUser.uid,
+                    email: authUser.email || '',
+                    role: authUser.email === 'admin@example.com' ? 'admin' : 'user',
+                    status: 'active'
+                }),
+            });
+
+            if (!createRes.ok) {
+                throw new Error("Failed to create user in database.");
+            }
+
+            userFromDb = await createRes.json();
+        } else {
+            userFromDb = await res.json();
+        }
         
         if (userFromDb.status === 'inactive') {
             await auth.signOut();
@@ -98,13 +116,21 @@ export function LoginForm() {
                 status: 'active'
             };
             
-            await setDoc(doc(firestore, 'users', newAuthUser.uid), newUserDoc);
+            const res = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newUserDoc),
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to create user in database.");
+            }
             
-            // Now that user is created in Auth and Firestore, proceed to dashboard
+            // Now that user is created in Auth and database, proceed to dashboard
             await proceedToDashboard(newAuthUser);
 
         } catch (signUpError: any) {
-            if (signUpError.code === 'auth/email-already-in-use') {
+            if (signUpError.message?.includes('email-already-in-use')) {
                  toast({
                     variant: "destructive",
                     title: "Login Failed",

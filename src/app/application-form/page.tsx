@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,8 +23,7 @@ import { enToBn } from "@/lib/utils";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useFirestore } from "@/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { useConsumer } from "@/hooks/use-database";
 
 type AppType = "refund" | "shift" | "load" |"Install" | "reconn" | "check";
 
@@ -58,83 +56,63 @@ export default function ApplicationFormPage() {
   );
   const previewRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const firestore = useFirestore();
-  const [isSearching, setIsSearching] = useState(false);
+  const [accNo, setAccNo] = useState<string | null>(null);
+  const { data: consumer, isLoading: isSearching } = useConsumer(accNo);
 
-  const handleInputChange = async (
+  const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     
-    // Update state for the input being changed
     setAppData(prev => ({ ...prev, [name]: value }));
 
     if (name === 'accNo') {
-        // Clear fields if accNo is cleared
-        if (value === '') {
-            setAppData(prev => ({
-                ...prev,
-                custName: "",
-                fatherName: "",
-                meterNo: "",
-                mobileNo: "",
-                address: "",
-                tarrif: "",
-            }));
-            return;
-        }
-
-        // Only search when the input looks like a valid account number
-        if (value.length > 4) { 
-            setIsSearching(true);
-            try {
-                if (!firestore) {
-                  toast({ variant: "destructive", title: "Error", description: "Firestore is not available." });
-                  return;
-                }
-                const docRef = doc(firestore, 'consumers', value);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const consumer = docSnap.data();
-                    setAppData(prev => ({
-                        ...prev,
-                        custName: consumer.name || '',
-                        fatherName: consumer.guardian || '',
-                        meterNo: consumer.meterNo || '',
-                        mobileNo: consumer.mobile || '',
-                        address: consumer.address || '',
-                        tarrif: consumer.tarrif || '',
-                    }));
-                    toast({
-                        title: "গ্রাহক পাওয়া গেছে",
-                        description: `${consumer.name} এর তথ্য লোড হয়েছে।`,
-                    });
-                } else {
-                    // Optional: Clear fields if no consumer is found
-                    setAppData(prev => ({
-                        ...prev,
-                        custName: "",
-                        fatherName: "",
-                        meterNo: "",
-                        mobileNo: "",
-                        address: "",
-                        tarrif: "",
-                    }));
-                }
-            } catch (error) {
-                console.error("Error fetching consumer data:", error);
-                toast({
-                    variant: "destructive",
-                    title: "Error",
-                    description: "Could not fetch consumer data.",
-                });
-            } finally {
-                setIsSearching(false);
-            }
-        }
+      if (value === '') {
+        setAppData(prev => ({
+          ...prev,
+          custName: "",
+          fatherName: "",
+          meterNo: "",
+          mobileNo: "",
+          address: "",
+          tarrif: "",
+        }));
+        setAccNo(null);
+        return;
+      }
+      if (value.length > 4) {
+        setAccNo(value);
+      }
     }
   };
+
+  useEffect(() => {
+    if (consumer && consumer.name) {
+      setAppData(prev => ({
+        ...prev,
+        custName: consumer.name || "",
+        fatherName: consumer.guardian || "",
+        meterNo: consumer.meterNo || "",
+        mobileNo: consumer.mobile || "",
+        address: consumer.address || "",
+        tarrif: consumer.tarrif || "",
+      }));
+      toast({
+        title: "গ্রাহক পাওয়া গেছে",
+        description: `${consumer.name} এর তথ্য লোড হয়েছে।`,
+      });
+    }
+  }, [consumer, toast]);
+
+  React.useEffect(() => {
+    if (accNo && !isSearching && !consumer) {
+      toast({
+        variant: "destructive",
+        title: "গ্রাহক পাওয়া যায়নি",
+        description: `হিসাব নং ${accNo} এর কোনো তথ্য পাওয়া যায়নি। সঠিক নম্বর নিশ্চিত করুন।`,
+      });
+    }
+  }, [accNo, isSearching, consumer, toast]);
 
   const handleSelectChange = (value: AppType) => {
     setAppData((prev) => ({ ...prev, appType: value }));
@@ -150,7 +128,7 @@ export default function ApplicationFormPage() {
     let subject = "",
       content = "";
     const meter = enToBn(appData.meterNo) || "..............";
-    const accNo = enToBn(appData.accNo) || "..............";
+    const accNoFormatted = enToBn(appData.accNo) || "..............";
 
     switch (appData.appType) {
       case "refund":
@@ -159,7 +137,7 @@ export default function ApplicationFormPage() {
         break;
       case "shift":
         subject = "বিদ্যুৎ মিটারটি নিরাপদ স্থানে স্থানান্তরের জন্য আবেদন।";
-        content = `আমার গ্রাহক নম্বর ${accNo} (মিটার নং: ${meter}) বর্তমানে যেখানে স্থাপিত আছে, সেখানে ভবন সংস্কার কাজের কারণে নিরাপদ স্থানে স্থানান্তর করা জরুরি হয়ে পড়েছে। প্রয়োজনীয় ফি গ্রহণপূর্বক মিটারটি স্থানান্তরের অনুমতি দানে আপনার সদয় মর্জি কামনা করছি।`;
+        content = `আমার গ্রাহক নম্বর ${accNoFormatted} (মিটার নং: ${meter}) বর্তমানে যেখানে স্থাপিত আছে, সেখানে ভবন সংস্কার কাজের কারণে নিরাপদ স্থানে স্থানান্তর করা জরুরি হয়ে পড়েছে। প্রয়োজনীয় ফি গ্রহণপূর্বক মিটারটি স্থানান্তরের অনুমতি দানে আপনার সদয় মর্জি কামনা করছি।`;
         break;
       case "load":
         subject = "অনুমোদিত লোড বৃদ্ধির জন্য আবেদন।";
@@ -167,16 +145,16 @@ export default function ApplicationFormPage() {
         break;
       case "Install":
         subject = "বকেয়া বিদ্যুৎ বিল কিস্তিতে পরিশোধের অনুমতি প্রসঙ্গে আবেদন।।";
-        content = `আমার গ্রাহক নম্বর ${accNo}। বিভিন্ন আর্থিক সীমাবদ্ধতার কারণে নির্ধারিত সময়ে বিদ্যুৎ বিল পরিশোধ করতে না পারায় বর্তমানে আমার নামে ..................মাসের .........................টাকা বকেয়া বিল জমা হয়েছে।
+        content = `আমার গ্রাহক নম্বর ${accNoFormatted}। বিভিন্ন আর্থিক সীমাবদ্ধতার কারণে নির্ধারিত সময়ে বিদ্যুৎ বিল পরিশোধ করতে না পারায় বর্তমানে আমার নামে ..................মাসের .........................টাকা বকেয়া বিল জমা হয়েছে।
 
 বর্তমানে এককালীনভাবে সম্পূর্ণ বকেয়া বিল পরিশোধ করা আমার পক্ষে সম্ভব নয়। তবে আমি নিয়মিতভাবে কিস্তির মাধ্যমে বকেয়া বিল পরিশোধ করতে আগ্রহী এবং সক্ষম। এমতাবস্থায়, মানবিক বিবেচনায় আমাকে ........... কিস্তির মাধ্যমে উক্ত বকেয়া বিল পরিশোধের সুযোগ প্রদান করার জন্য আপনার সদয় অনুমোদন প্রার্থনা করছি।
-আজকে বকেয়া বিলের ........................টাকা পরিশোধ করতে ইচ্ছুক ।
+আজকে বকেয়া বিলের ........................টাকা পরিশোধ করতে ইচ্ছুক ।
 আমি অঙ্গীকার করছি যে, অনুমোদিত কিস্তি অনুযায়ী নির্ধারিত সময়ের মধ্যে অবশিষ্ট্য সকল বকেয়া বিল পরিশোধ করব এবং ভবিষ্যতে নিয়মিতভাবে বিদ্যুৎ বিল পরিশোধ করব।`;
         break;
 
-case "reconn":
-  subject = "বকেয়া বিদ্যুৎ বিল কিস্তিতে পরিশোধ ও বিচ্ছিন্ন সংযোগ পুনঃসংযোগের অনুমতি প্রসঙ্গে আবেদন।";
-  content = `আমার গ্রাহক নম্বর ${accNo}। বিভিন্ন আর্থিক সীমাবদ্ধতার কারণে নির্ধারিত সময়ে বিদ্যুৎ বিল পরিশোধ করতে না পারায় বর্তমানে আমার নামে .................. মাসের ......................... টাকা বকেয়া বিল জমা হয়েছে, যার পরিপ্রেক্ষিতে আমার বিদ্যুৎ সংযোগটি সাময়িকভাবে বিচ্ছিন্ন করা হয়েছে।
+      case "reconn":
+        subject = "বকেয়া বিদ্যুৎ বিল কিস্তিতে পরিশোধ ও বিচ্ছিন্ন সংযোগ পুনঃসংযোগের অনুমতি প্রসঙ্গে আবেদন।";
+        content = `আমার গ্রাহক নম্বর ${accNoFormatted}। বিভিন্ন আর্থিক সীমাবদ্ধতার কারণে নির্ধারিত সময়ে বিদ্যুৎ বিল পরিশোধ করতে না পারায় বর্তমানে আমার নামে .................. মাসের ......................... টাকা বকেয়া বিল জমা হয়েছে, যার পরিপ্রেক্ষিতে আমার বিদ্যুৎ সংযোগটি সাময়িকভাবে বিচ্ছিন্ন করা হয়েছে।
 
 বর্তমানে এককালীনভাবে সম্পূর্ণ বকেয়া বিল পরিশোধ করা আমার পক্ষে সম্ভব নয়। তবে আমি নিয়মিতভাবে কিস্তির মাধ্যমে বকেয়া বিল পরিশোধ করতে আগ্রহী ও সক্ষম। এমতাবস্থায়, মানবিক বিবেচনায় আমাকে ........... কিস্তির মাধ্যমে উক্ত বকেয়া বিল পরিশোধের সুযোগ প্রদান করার জন্য আপনার সদয় অনুমোদন প্রার্থনা করছি।
 
@@ -185,12 +163,11 @@ case "reconn":
 আমি অঙ্গীকার করছি যে, অনুমোদিত কিস্তি অনুযায়ী নির্ধারিত সময়ের মধ্যে অবশিষ্ট সকল বকেয়া বিল পরিশোধ করব এবং ভবিষ্যতে নিয়মিতভাবে বিদ্যুৎ বিল পরিশোধ করব।
 অতএব, উপরোক্ত বিষয়াদি বিবেচনাপূর্বক কিস্তিতে বকেয়া বিল পরিশোধের অনুমতি প্রদানের পাশাপাশি আমার বিচ্ছিন্নকৃত বিদ্যুৎ সংযোগটি দ্রুত পুনঃসংযোগ প্রদানের জন্য প্রয়োজনীয় ব্যবস্থা গ্রহণে আপনার সদয় অনুমোদন কামনা করছি।
 `;
-  break;
-
+        break;
 
       case "check":
         subject = "মিটার বা ওয়্যারিং পরীক্ষার আবেদন।";
-        content = ` আমার গ্রাহক নম্বর ${accNo} এবং মিটার নং: ${meter}-এ বিগত কয়েক মাস যাবত অস্বাভাবিক বিদ্যুৎ বিল প্রদর্শিত হচ্ছে। আমার ধারণা মিটারে কোনো কারিগরি ত্রুটি থাকতে পারে। এমতাবস্থায় মিটারটি বা ইন্টারনাল ওয়্যারিং পরীক্ষা করার প্রয়োজনীয় ব্যবস্থা গ্রহণে আপনার সুমর্জি হয়।`;
+        content = ` আমার গ্রাহক নম্বর ${accNoFormatted} এবং মিটার নং: ${meter}-এ বিগত কয়েক মাস যাবত অস্বাভাবিক বিদ্যুৎ বিল প্রদর্শিত হচ্ছে। আমার ধারণা মিটারে কোনো কারিগরি ত্রুটি থাকতে পারে। এমতাবস্থায় মিটারটি বা ইন্টারনাল ওয়্যারিং পরীক্ষা করার প্রয়োজনীয় ব্যবস্থা গ্রহণে আপনার সুমর্জি হয়।`;
         break;
     }
 
@@ -202,7 +179,7 @@ case "reconn":
           <br />
           বরাবর,
           <br />
-          <strong>সিনিয়র জেনারেল ম্যানেজার</strong>
+          <strong>সিনিয়র জেনারেল ম্যানেজার</strong>
           <br />
           গাজীপুর পল্লী বিদ্যুৎ সমিতি–২
           <br />
@@ -210,7 +187,7 @@ case "reconn":
         </div>
 
         <div>
-          <div className="font-bold underline my-3 text-[16.5px]">বিষয়: {subject}</div>
+          <div className="font-bold underline my-3 text-[16.5px]">বিষয়: {subject}</div>
           <div className="text-justify text-[15.5px] leading-relaxed">
             <p>জনাব,<br/>সবিনয় নিবেদন এই যে, আমি আপনার পল্লী বিদ্যুৎ সমিতির একজন নিয়মিত গ্রাহক। {content}</p>
             {appData.extraDesc && <p>{appData.extraDesc}</p>}
@@ -231,7 +208,7 @@ case "reconn":
     );
 
     setTimeout(() => {
-        previewRef.current?.scrollIntoView({ behavior: 'smooth' });
+      previewRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   };
   
@@ -252,7 +229,7 @@ case "reconn":
         <CardHeader>
           <CardTitle>আবেদন পত্র তৈরি করুন</CardTitle>
           <CardDescription>
-            প্রয়োজনীয় তথ্য দিয়ে আবেদন পত্র তৈরি করুন।
+            প্রয়োজনীয় তথ্য দিয়ে আবেদন পত্র তৈরি করুন।
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
