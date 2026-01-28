@@ -122,7 +122,7 @@ export function NewDashboard({
               
               <div id="s_load" className={letterType === 'load' ? 'show-sec' : 'hidden-sec'}>
                 <span className="subject">বিষয়: অনুমোদিত লোড অপেক্ষা অধিক লোড (Overload) ব্যবহারের কারণে নিয়মিতকরণ নোটিশ।</span>
-                আপনার বিদ্যুৎ সংযোগের রেকর্ড ও মিটার রিডিং ডাটা পর্যালোচনা করে দেখা যায়, আপনি আপনার প্রতিষ্ঠানে অনুমোদিত লোড অপেক্ষা অধিক লোড ব্যবহার করছেন যা বিতরণ ট্রান্সফরমারকে/সাবস্টেশনকে ঝুঁকির মুখে ফেলছে। আগামী ০৭ কার্যদিবসের মধ্যে বর্ধিত লোড নিয়মিতকরণের আবেদন না করলে কারিগরি নিরাপত্তার স্বার্থে সংযোগ বিচ্ছিন্ন করা হবে।
+                আপনার বিদ্যুৎ সংযোগের রেকর্ড ও মিটার রিডিং ডাটা পর্যালোচনা করে দেখা যায়, বর্ণিত হিসাব ও মিটারের  বিপরীতে আপনার অনুমোদিত লোড ........ কিলোওয়াট বাস্তবে আপনি ........ কিলোওয়াট লোড ব্যবহার করছেন যা বিতরণ ট্রান্সফরমারকে/সাবস্টেশনকে ঝুঁকির মুখে ফেলছে। আগামী ০৭ কার্যদিবসের মধ্যে বর্ধিত লোড নিয়মিতকরণের আবেদন না করলে কারিগরি নিরাপত্তার স্বার্থে সংযোগ বিচ্ছিন্ন করা হবে।
               </div>
 
               <div id="s_board" className={letterType === 'board' ? 'show-sec' : 'hidden-sec'}>
@@ -304,7 +304,7 @@ export function NewDashboard({
             color: #1a5276;
         }
         
-        #letterContent .header h3 {
+        #letterContent .header h1 {
             margin: 0; 
             font-weight: bold;
             font-size: 1.3rem;
@@ -330,7 +330,7 @@ export function NewDashboard({
           height: auto;
         }
         
-        #letterContent .header-text h3, #letterContent .header-text p {
+        #letterContent .header-text h1, #letterContent .header-text p {
           margin: 0;
           padding: 0;
         }
