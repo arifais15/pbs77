@@ -33,7 +33,7 @@ body {
 
 /* For print/letter content - supports both Bangla and Devanagari */
 #letterContent, .print-area {
-  font-family: 'SolaimanLipi', 'Nikosh', sans-serif;
+  font-family: 'Nikosh','SolaimanLipi', sans-serif;
 }
 
 /* For form inputs with Bangla/Devanagari */
