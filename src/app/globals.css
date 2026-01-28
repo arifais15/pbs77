@@ -2,7 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Bangla and Devanagari Font Configuration */
+/* ===============================
+   Font Configuration
+=============================== */
 @font-face {
   font-family: 'SolaimanLipi';
   src: url('https://fonts.gstatic.com/s/solaimanlipi/v0/0FlJvvnALIo8Zo8QJ7ZuLiZFXD9QJjCYf5Hf0vU7FzQ.woff2') format('woff2');
@@ -18,50 +20,153 @@
   src: url('https://fonts.gstatic.com/s/notosansdevanagari/v12/LDI0apGSMKhLmJUIVJQSh0HY0xZhYMh-BgXBWR3Q00JdI_m0AEVGfAGJQ76A5MWDL0BPz8eZKxY6qGJjdPvUdAE.0.woff2') format('woff2');
 }
 
-/* Apply Bangla & Devanagari fonts to body */
+/* ===============================
+   Global Body
+=============================== */
 body {
   font-family: 'Nikosh', 'SolaimanLipi', 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.05rem; /* professional size */
+  line-height: 1.6;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
 }
 
-/* Specific class for Bangla content */
+/* Specific Bangla text */
 .bangla-text {
   font-family: 'Nikosh', 'SolaimanLipi', sans-serif;
-  font-size: 1.15em;      /* increase font size */
+  font-size: 1.15rem;      /* slightly bigger for readability */
   letter-spacing: 0.5px;
 }
 
-
-/* For print/letter content - supports both Bangla and Devanagari */
-#letterContent, .print-area {
-  font-family: 'Nikosh','SolaimanLipi', sans-serif;
-}
-
-/* For form inputs with Bangla/Devanagari */
+/* ===============================
+   Form Controls Styling
+=============================== */
 input[type="text"],
 input[type="email"],
-textarea {
+textarea,
+select {
   font-family: 'Nikosh', 'SolaimanLipi', inherit;
+  font-size: 1.1rem; /* ~17-18px */
+  line-height: 1.5;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--input));
+  color: hsl(var(--foreground));
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-/* Table cells and data display */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--ring)/0.4);
+}
+
+/* Labels */
+label {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+/* Card content text */
+.card-content, .card-description, .card-title {
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+/* ===============================
+   Table Cells & Data Display
+=============================== */
 table, td, th {
   font-family: 'Nikosh', 'SolaimanLipi', inherit;
+  font-size: 1.05rem;
+  line-height: 1.5;
 }
+
+/* ===============================
+   Print Styles
+=============================== */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area, .print-area * {
+    visibility: visible;
+  }
+
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  #letterContent {
+    box-sizing: border-box;
+    visibility: visible;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 210mm;
+    height: 250mm;
+    padding: 20mm 20mm 15mm 25mm;
+    margin: 0;
+    box-shadow: none;
+    border: none;
+    overflow: hidden;
+  }
+
+  #application-preview, #application-preview * {
+    visibility: visible;
+  }
+
+  #application-preview {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 2cm;
+    box-shadow: none;
+    border: none;
+  }
+
+  .no-print-area {
+    display: none !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
+
+/* ===============================
+   Tailwind Variables & Dark Mode
+=============================== */
 @layer base {
   :root {
-    --background: 209 33% 91%; /* #E0E8EF */
+    --background: 209 33% 91%;
     --foreground: 205 63% 15%;
     --card: 209 33% 97%;
     --card-foreground: 205 63% 15%;
     --popover: 209 33% 97%;
     --popover-foreground: 205 63% 15%;
-    --primary: 205 63% 28%; /* #1A5276 */
+    --primary: 205 63% 28%;
     --primary-foreground: 210 40% 98%;
     --secondary: 209 33% 85%;
     --secondary-foreground: 205 63% 28%;
     --muted: 209 33% 85%;
     --muted-foreground: 209 49% 30%;
-    --accent: 209 49% 40%; /* #346E99 */
+    --accent: 209 49% 40%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -91,71 +196,5 @@ table, td, th {
     --border: 209 33% 25%;
     --input: 209 33% 25%;
     --ring: 209 49% 50%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
-@media print {
-  body * {
-    visibility: hidden;
-  }
-
-  .print-area, .print-area * {
-    visibility: visible;
-  }
-
-  .print-area {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-  }
-  
-  #letterContent {
-    box-sizing: border-box; /* Ensures padding is included in height */
-    visibility: visible;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 210mm;
-    height: 250mm;
-    padding: 20mm 20mm 15mm 25mm;
-    margin: 0;
-    box-shadow: none;
-    border: none;
-    overflow: hidden; /* This will hide any content that overflows */
-  }
-
-  #application-preview, #application-preview * {
-    visibility: visible;
-  }
-
-  #application-preview {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: auto;
-    margin: 0;
-    padding: 2cm;
-    box-shadow: none;
-    border: none;
-  }
-
-  .no-print-area {
-    display: none !important;
-  }
-  
-  @page {
-    size: A4;
-    margin: 0;
   }
 }
