@@ -7,44 +7,34 @@ import { Button } from '@/components/ui/button';
 import { ConsumerEditor } from '@/components/consumer-editor';
 import { toBanglaNumeral } from '@/lib/numeral-converter';
 
-interface Consumer {
-  id: string;
-  accNo: string;
-  name: string;
-  guardian: string;
-  meterNo: string;
-  mobile: string;
-  address: string;
-  tarrif: string;
-  created_at: string;
-}
-
-interface ViewDatabaseClientProps {
-  initialConsumers: Consumer[];
-  pageSize?: number;
-}
-
-export function ViewDatabaseClient({ initialConsumers, pageSize = 20 }: ViewDatabaseClientProps) {
-  const [selectedAccNo, setSelectedAccNo] = useState<string | null>(null);
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
+export function ViewDatabaseClient() {
+  const [consumers, setConsumers] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [consumers, setConsumers] = useState<Consumer[]>([]);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [selectedAccNo, setSelectedAccNo] = useState<string | null>(null);
 
-  const totalPages = Math.ceil(initialConsumers.length / pageSize);
+  const limit = 20; // 20 rows per page
 
-  useEffect(() => {
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize;
-    setConsumers(initialConsumers.slice(start, end));
-  }, [page, initialConsumers, pageSize]);
-
-  const handleSuccess = () => {
-    // Reload page on edit/save
-    window.location.reload();
+  const fetchData = async (pageNum: number) => {
+    try {
+      const res = await fetch(`/api/consumers?page=${pageNum}&limit=${limit}`);
+      const data = await res.json();
+      setConsumers(data.consumers);
+      setTotal(data.total);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
+  useEffect(() => {
+    fetchData(page);
+  }, [page]);
+
+  const totalPages = Math.ceil(total / limit);
+
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen p-6 bg-background">
       <div className="max-w-7xl mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Database Viewer</h1>
@@ -53,13 +43,11 @@ export function ViewDatabaseClient({ initialConsumers, pageSize = 20 }: ViewData
 
         <Card>
           <CardHeader>
-            <CardTitle>Consumers ({initialConsumers.length})</CardTitle>
-            <CardDescription>
-              All consumer records stored in the database. Click Edit to modify or delete a record.
-            </CardDescription>
+            <CardTitle>Consumers ({total})</CardTitle>
+            <CardDescription>Click Edit to modify or delete a record.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="rounded-lg border overflow-x-auto">
+            <div className="overflow-x-auto rounded-lg border">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50">
@@ -82,27 +70,21 @@ export function ViewDatabaseClient({ initialConsumers, pageSize = 20 }: ViewData
                       </TableCell>
                     </TableRow>
                   ) : (
-                    consumers.map((c) => (
-                      <TableRow key={c.id}>
-                        <TableCell className="font-mono text-sm font-bangla">{toBanglaNumeral(c.accNo)}</TableCell>
-                        <TableCell>{c.name}</TableCell>
-                        <TableCell>{c.guardian}</TableCell>
-                        <TableCell className="font-bangla">{toBanglaNumeral(c.meterNo)}</TableCell>
-                        <TableCell className="font-bangla">{toBanglaNumeral(c.mobile)}</TableCell>
-                        <TableCell className="max-w-xs truncate">{c.address}</TableCell>
-                        <TableCell>{c.tarrif}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {new Date(c.created_at).toLocaleDateString()}
-                        </TableCell>
+                    consumers.map((consumer: any) => (
+                      <TableRow key={consumer.id}>
+                        <TableCell className="font-mono text-sm font-bangla">{toBanglaNumeral(consumer.accNo)}</TableCell>
+                        <TableCell>{consumer.name}</TableCell>
+                        <TableCell>{consumer.guardian}</TableCell>
+                        <TableCell className="font-bangla">{toBanglaNumeral(consumer.meterNo)}</TableCell>
+                        <TableCell className="font-bangla">{toBanglaNumeral(consumer.mobile)}</TableCell>
+                        <TableCell className="max-w-xs truncate">{consumer.address}</TableCell>
+                        <TableCell>{consumer.tarrif}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{new Date(consumer.created_at).toLocaleDateString()}</TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedAccNo(c.accNo);
-                              setIsEditorOpen(true);
-                            }}
-                          >
+                          <Button size="sm" variant="outline" onClick={() => {
+                            setSelectedAccNo(consumer.accNo);
+                            setIsEditorOpen(true);
+                          }}>
                             Edit
                           </Button>
                         </TableCell>
@@ -113,26 +95,11 @@ export function ViewDatabaseClient({ initialConsumers, pageSize = 20 }: ViewData
               </Table>
             </div>
 
-            {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 mt-4">
-                <Button
-                  size="sm"
-                  disabled={page === 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                >
-                  Previous
-                </Button>
-                <span>
-                  Page {page} of {totalPages}
-                </span>
-                <Button
-                  size="sm"
-                  disabled={page === totalPages}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                >
-                  Next
-                </Button>
+              <div className="mt-4 flex justify-center space-x-2">
+                <Button disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</Button>
+                <span className="px-2 py-1 border rounded">{page} / {totalPages}</span>
+                <Button disabled={page === totalPages} onClick={() => setPage(page + 1)}>Next</Button>
               </div>
             )}
           </CardContent>
@@ -144,7 +111,7 @@ export function ViewDatabaseClient({ initialConsumers, pageSize = 20 }: ViewData
           accNo={selectedAccNo}
           isOpen={isEditorOpen}
           onClose={() => setIsEditorOpen(false)}
-          onSuccess={handleSuccess}
+          onSuccess={() => fetchData(page)}
         />
       )}
     </div>
