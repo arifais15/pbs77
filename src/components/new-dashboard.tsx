@@ -309,6 +309,7 @@ export function NewDashboard({
             font-weight: bold;
             font-size: 1.3rem;
             line-height: 1;
+            text-align: center;
         }
     
         #letterContent .header p {
