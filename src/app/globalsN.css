@@ -2,6 +2,51 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Bangla and Devanagari Font Configuration */
+@font-face {
+  font-family: 'SolaimanLipi';
+  src: url('https://fonts.gstatic.com/s/solaimanlipi/v0/0FlJvvnALIo8Zo8QJ7ZuLiZFXD9QJjCYf5Hf0vU7FzQ.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Nikosh';
+  src: url('https://fonts.gstatic.com/s/nikosh/v0/h09DYn9CUJKhEBKLlLmMGqRa1Jd0Z5ltg5Xw-qC55FI.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Noto Sans Devanagari';
+  src: url('https://fonts.gstatic.com/s/notosansdevanagari/v12/LDI0apGSMKhLmJUIVJQSh0HY0xZhYMh-BgXBWR3Q00JdI_m0AEVGfAGJQ76A5MWDL0BPz8eZKxY6qGJjdPvUdAE.0.woff2') format('woff2');
+}
+
+/* Apply Bangla & Devanagari fonts to body */
+body {
+  font-family: 'Nikosh', 'SolaimanLipi', 'Segoe UI', 'Roboto', sans-serif;
+}
+
+/* Specific class for Bangla content */
+.bangla-text {
+  font-family: 'Nikosh', 'SolaimanLipi', sans-serif;
+  font-size: 1.05em;
+  letter-spacing: 0.5px;
+}
+
+/* For print/letter content - supports both Bangla and Devanagari */
+#letterContent, .print-area {
+  font-family: 'SolaimanLipi', 'Nikosh', sans-serif;
+}
+
+/* For form inputs with Bangla/Devanagari */
+input[type="text"],
+input[type="email"],
+textarea {
+  font-family: 'Nikosh', 'SolaimanLipi', inherit;
+}
+
+/* Table cells and data display */
+table, td, th {
+  font-family: 'Nikosh', 'SolaimanLipi', inherit;
+}
+
 @layer base {
   :root {
     --background: 209 33% 91%; /* #E0E8EF */
