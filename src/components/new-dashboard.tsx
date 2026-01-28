@@ -56,17 +56,16 @@ export function NewDashboard({
             <h3>গাজীপুর পল্লী বিদ্যুৎ সমিতি–২</h3>
             <p>রাজেন্দ্রপুর, গাজীপুর।</p>
             <div className="contact-info">
-              ইমেইল: gazipurpbs2@gmail.com | ওয়েব: pbs2.gazipur.gov.bd
-            </div>
+              ইমেইল: gazipurpbs2@gmail.com | ওয়েবসাইট: https://pbs2.gazipur.gov.bd       </div>
           </div>
         </div>
 
         <div className="meta-row">
           <span>
-            স্মারক নং: ২৭.১২.৩৩৩০.<span id="outSmarok">{inputs.inSmarok}</span>
+            স্মারক নং: ২৭.১২.৩৩৩০.<span id="outSmarok">{enToBn(inputs.inSmarok)}</span>
           </span>
           <span>
-            তারিখ: <span id="outDate">{bnDate}</span>
+            তারিখ: <span id="outDate">{bnDate} ইং</span>
           </span>
         </div>
 
@@ -80,10 +79,12 @@ export function NewDashboard({
           <strong>হিসাব নং:</strong> <span id="outAcc">{enToBn(inputs.inAcc)}</span>,{' '}
           <strong>মিটার নং:</strong> <span id="outMeter">{enToBn(inputs.inMeter)}</span>
           <br />
+          <strong>ট্যারিফ:</strong> {inputs.inTarrif || '................'}
+          <br />
           <strong>ঠিকানা:</strong> <span id="outOffice">{inputs.inOffice}</span>
           <br />
           <strong>মোবাইল:</strong> {enToBn(inputs.inMobile) || '................'},{' '}
-          <strong>ট্যারিফ:</strong> {inputs.inTarrif || '................'}
+          
         </div>
 
         <div className="main-text">
