@@ -20,31 +20,31 @@
 
 /* Apply Bangla & Devanagari fonts to body */
 body {
-  font-family: 'Nikosh', 'SolaimanLipi', 'Noto Sans Devanagari', 'Segoe UI', 'Roboto', sans-serif;
+  font-family: 'Nikosh', 'SolaimanLipi', 'Segoe UI', 'Roboto', sans-serif;
 }
 
 /* Specific class for Bangla content */
 .bangla-text {
-  font-family: 'Nikosh', 'SolaimanLipi', 'Noto Sans Devanagari', sans-serif;
+  font-family: 'Nikosh', 'SolaimanLipi', sans-serif;
   font-size: 1.05em;
   letter-spacing: 0.5px;
 }
 
 /* For print/letter content - supports both Bangla and Devanagari */
 #letterContent, .print-area {
-  font-family: 'SolaimanLipi', 'Nikosh', 'Noto Sans Devanagari', sans-serif;
+  font-family: 'SolaimanLipi', 'Nikosh', sans-serif;
 }
 
 /* For form inputs with Bangla/Devanagari */
 input[type="text"],
 input[type="email"],
 textarea {
-  font-family: 'Nikosh', 'SolaimanLipi', 'Noto Sans Devanagari', inherit;
+  font-family: 'Nikosh', 'SolaimanLipi', inherit;
 }
 
 /* Table cells and data display */
 table, td, th {
-  font-family: 'Nikosh', 'SolaimanLipi', 'Noto Sans Devanagari', inherit;
+  font-family: 'Nikosh', 'SolaimanLipi', inherit;
 }
 
 @layer base {
