@@ -280,7 +280,7 @@ export function NewDashboard({
         
         #letterContent {
             width: 210mm;
-            height: 297mm;
+            height: 250mm;
             padding: 15mm 20mm 15mm 25mm;
             background: white;
             position: relative;
@@ -304,7 +304,7 @@ export function NewDashboard({
             color: #1a5276;
         }
         
-        #letterContent .header h1 {
+        #letterContent .header h3 {
             margin: 0; 
             font-weight: bold;
             font-size: 1.3rem;
@@ -330,7 +330,7 @@ export function NewDashboard({
           height: auto;
         }
         
-        #letterContent .header-text h1, #letterContent .header-text p {
+        #letterContent .header-text h3, #letterContent .header-text p {
           margin: 0;
           padding: 0;
         }
