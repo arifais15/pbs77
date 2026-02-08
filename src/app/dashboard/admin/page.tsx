@@ -126,9 +126,16 @@ export default function AdminDashboardPage() {
 
         {/* System Users */}
         <Card>
-          <CardHeader>
-            <CardTitle>System Users</CardTitle>
-            <CardDescription>All registered users ({users?.length || 0})</CardDescription>
+          <CardHeader className="flex items-center justify-between">
+            <div>
+              <CardTitle>System Users</CardTitle>
+              <CardDescription>All registered users ({users?.length || 0})</CardDescription>
+            </div>
+            <div>
+              <Link href="/dashboard/admin/users">
+                <Button size="sm">Manage Users</Button>
+              </Link>
+            </div>
           </CardHeader>
           <CardContent>
             {usersLoading ? (
