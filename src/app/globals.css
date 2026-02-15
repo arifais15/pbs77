@@ -129,17 +129,17 @@ table, td, th {
    Print Styles (A4 Setup)
 =============================== */
 @media print {
-
   @page {
     size: A4;
-    margin: 0in 0.5in 0.5in 1in; 
-    /* Top Right Bottom Left */
+    margin: 0;
+    padding: 0;
   }
 
   html, body {
     width: 210mm;
     height: 297mm;
     margin: 0;
+    padding: 0;
   }
 
   body * {
@@ -162,6 +162,8 @@ table, td, th {
     background-color: white !important;
     box-shadow: none !important;
     margin-top: 0;
+    margin: 0;
+    padding: 15px 40px 10px 40px;
   }
 
   #letterContent {
@@ -176,6 +178,57 @@ table, td, th {
   .no-print-area {
     display: none !important;
   }
+}
+
+/* ================= HEADER ================= */
+
+.header {
+  display: grid;
+  grid-template-columns: 140px 1fr 260px;
+  align-items: center;
+  padding: 15px 40px 10px 40px;
+  border-bottom: 3px solid black;
+  background: white;
+}
+
+/* Left Logo */
+.header-left {
+  display: flex;
+  justify-content: center;
+}
+
+.logo-img {
+  width: 85px;
+  height: auto;
+}
+
+/* Center Text */
+.header-center {
+  text-align: center;
+}
+
+.header-center h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.header-center .sub-title {
+  margin-top: 5px;
+  font-size: 17px;
+  letter-spacing: 0.5px;
+}
+
+/* Right Contact */
+.header-right {
+  text-align: right;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.header-right p {
+  margin: 2px 0;
 }
 
 /* ===============================
