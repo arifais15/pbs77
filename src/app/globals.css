@@ -57,17 +57,18 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Left */
 .header-left {
-  width: 200px;
+  width: 100px;
 }
 
 .logo-img {
   width: 90px;
   height: auto;
+  margin-top: 0;
+  margin-left: 0;
 }
 
 /* Center */
 .header-center {
-  flex: 1;
   text-align: center;
   min-width: 0;
   padding: 0 20px;
@@ -173,9 +174,9 @@ table, td, th {
   .header {
     background-color: white !important;
     box-shadow: none !important;
-    margin-top: 0;
     margin: 0;
     padding: 15px 40px 10px 40px;
+    border-bottom: 3px solid black;
   }
 
   #letterContent {
@@ -195,69 +196,67 @@ table, td, th {
 /* ================= HEADER ================= */
 
 .header {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  padding: 10px 40px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 40px;
   border-bottom: 3px solid black;
   background: white;
-  gap: 15px;
-  align-items: center;
+  gap: 20px;
 }
 
 /* Left Logo */
 .header-left {
   display: flex;
   justify-content: center;
+  align-items: center;
   flex-shrink: 0;
 }
 
 .logo-img {
-  width: 70px;
-  height: 70px;
-  display: flex;
+  width: 75px;
+  height: 75px;
+  object-fit: contain;
   flex-shrink: 0;
-  align-items: left;
-  margin-top: 0;
 }
 
 /* Center Text */
 .header-center {
   text-align: center;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
+  padding: 0 15px;
 }
 
 .header-center h2 {
   margin: 0;
-  font-size: 26px;
+  padding: 0;
+  font-size: 24px;
   font-weight: bold;
-  line-height: 1.15;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: break-word;
+  line-height: 1.3;
 }
 
-.header-center .sub-title {
-  margin-top: 3px;
-  font-size: 15px;
+.header-center p {
+  margin: 5px 0 0 0;
+  padding: 0;
+  font-size: 14px;
   letter-spacing: 0.5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.15;
 }
 
 /* Right Contact */
 .header-right {
   text-align: right;
-  font-size: 13px;
-  line-height: 1.3;
+  font-size: 12px;
+  line-height: 1.15;
   flex-shrink: 0;
+  min-width: 180px;
 }
 
 .header-right p {
-  margin: 1px 0;
-  white-space: nowrap;
+  margin: 2px 0;
+  white-space: normal;
 }
 
 /* ===============================

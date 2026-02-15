@@ -365,7 +365,7 @@ export function NewDashboard({
         
         #letterContent .header-text p {
           font-size: 1rem;
-          margin-top: 2px;
+          margin-top: 0;
         }
         
         #letterContent .contact-info {
