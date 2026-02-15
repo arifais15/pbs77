@@ -15,104 +15,39 @@
   src: url('https://fonts.gstatic.com/s/nikosh/v0/h09DYn9CUJKhEBKLlLmMGqRa1Jd0Z5ltg5Xw-qC55FI.woff2') format('woff2');
 }
 
-
 /* ===============================
    Global Body
 =============================== */
 body {
   font-family: 'Nikosh', 'SolaimanLipi', 'Segoe UI', 'Roboto', sans-serif;
-  font-size: 1.05rem; /* professional size */
+  font-size: 1.05rem;
   line-height: 1.6;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
+  margin: 0;
 }
 
-/* Specific Bangla text */
 .bangla-text {
   font-family: 'Nikosh', 'SolaimanLipi', sans-serif;
-  font-size: 1.15rem;      /* slightly bigger for readability */
+  font-size: 1.15rem;
   letter-spacing: 0.5px;
 }
 
 /* ===============================
-   Form Controls Styling
+   Header (Official Style)
 =============================== */
-input[type="text"],
-input[type="email"],
-textarea,
-select {
-  font-family: 'Nikosh', 'SolaimanLipi', inherit;
-  font-size: 1.1rem; /* ~17-18px */
-  line-height: 1.5;
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--radius);
-  border: 1px solid hsl(var(--border));
-  
-  width: 100%;
-  box-sizing: border-box;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-  outline: none;
-  border-color: hsl(var(--primary));
-  box-shadow: 0 0 0 2px hsl(var(--ring)/0.4);
-}
-
-/* Labels */
-label {
-  font-size: 1.15rem;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-  display: block;
-}
-
-/* Card content text */
-.card-content, .card-description, .card-title {
-  font-size: 1.05rem;
-  line-height: 1.5;
-}
-
-/* ===============================
-   Table Cells & Data Display
-=============================== */
-table, td, th {
-  font-family: 'Nikosh', 'SolaimanLipi', inherit;
-  font-size: 1.05rem;
-  line-height: 1.5;
-}
-
-/* ===============================
-   Print Styles
-=============================== */
-@media print {
-  body * {
-    visibility: hidden;
-  }
-
-  .print-area, .print-area * {
-    visibility: visible;
-  }
-
-  .print-area {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-  }
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 15px 30px;
-  background-color: #f2f2f2;
+  background-color: white;
+  border-bottom: 3px solid black;
 }
 
 /* Left */
 .header-left {
-  flex: 1;
+  width: 200px;
 }
 
 .logo-img {
@@ -122,7 +57,7 @@ table, td, th {
 
 /* Center */
 .header-center {
-  flex: 2;
+  flex: 1;
   text-align: center;
 }
 
@@ -139,7 +74,7 @@ table, td, th {
 
 /* Right */
 .header-right {
-  flex: 1;
+  width: 200px;
   text-align: right;
   font-size: 14px;
 }
@@ -148,44 +83,98 @@ table, td, th {
   margin: 2px 0;
 }
 
-  #letterContent {
-    box-sizing: border-box;
-    visibility: visible;
-    position: absolute;
-    left: 0;
-    top: 0;
+/* ===============================
+   Form Controls
+=============================== */
+input[type="text"],
+input[type="email"],
+textarea,
+select {
+  font-family: 'Nikosh', 'SolaimanLipi', inherit;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--ring)/0.4);
+}
+
+label {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+/* ===============================
+   Table Styling
+=============================== */
+table, td, th {
+  font-family: 'Nikosh', 'SolaimanLipi', inherit;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+/* ===============================
+   Print Styles (A4 Setup)
+=============================== */
+@media print {
+
+  @page {
+    size: A4;
+    margin: 0in 0.5in 0.5in 1in; 
+    /* Top Right Bottom Left */
+  }
+
+  html, body {
     width: 210mm;
-    height: 250mm;
-    padding: 20mm 20mm 15mm 25mm;
+    height: 297mm;
     margin: 0;
-    box-shadow: none;
-    border: none;
-    overflow: hidden;
   }
 
-  #application-preview, #application-preview * {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area,
+  .print-area * {
     visibility: visible;
   }
 
-  #application-preview {
+  .print-area {
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
-    height: auto;
+  }
+
+  .header {
+    background-color: white !important;
+    box-shadow: none !important;
+    margin-top: 0;
+  }
+
+  #letterContent {
+    box-sizing: border-box;
+    width: 100%;
     margin: 0;
-    padding: 2cm;
+    padding: 0;
     box-shadow: none;
     border: none;
   }
 
   .no-print-area {
     display: none !important;
-  }
-
-  @page {
-    size: A4;
-    margin: 0;
   }
 }
 
