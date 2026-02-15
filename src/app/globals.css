@@ -34,6 +34,16 @@ body {
 }
 
 /* ===============================
+   Heading Styles (Prevent Wrapping)
+=============================== */
+h1, h2, h3, h4, h5, h6 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* ===============================
    Header (Official Style)
 =============================== */
 .header {
@@ -59,6 +69,8 @@ body {
 .header-center {
   flex: 1;
   text-align: center;
+  min-width: 0;
+  padding: 0 20px;
 }
 
 .header-center h2 {
@@ -184,51 +196,68 @@ table, td, th {
 
 .header {
   display: grid;
-  grid-template-columns: 140px 1fr 260px;
-  align-items: center;
-  padding: 15px 40px 10px 40px;
+  grid-template-columns: auto 1fr auto;
+  padding: 10px 40px;
   border-bottom: 3px solid black;
   background: white;
+  gap: 15px;
+  align-items: center;
 }
 
 /* Left Logo */
 .header-left {
   display: flex;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .logo-img {
-  width: 85px;
-  height: auto;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  flex-shrink: 0;
+  align-items: left;
+  margin-top: 0;
 }
 
 /* Center Text */
 .header-center {
   text-align: center;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .header-center h2 {
   margin: 0;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: bold;
-  line-height: 1.2;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
 }
 
 .header-center .sub-title {
-  margin-top: 5px;
-  font-size: 17px;
+  margin-top: 3px;
+  font-size: 15px;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Right Contact */
 .header-right {
   text-align: right;
-  font-size: 14px;
-  line-height: 1.4;
+  font-size: 13px;
+  line-height: 1.3;
+  flex-shrink: 0;
 }
 
 .header-right p {
-  margin: 2px 0;
+  margin: 1px 0;
+  white-space: nowrap;
 }
 
 /* ===============================

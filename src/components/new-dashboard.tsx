@@ -296,7 +296,7 @@ export function NewDashboard({
         #letterContent {
             width: 210mm;
             height: 297mm;
-            padding: 15mm 20mm 15mm 25mm;
+            padding: 5mm 20mm 15mm 25mm;
             background: white;
             position: relative;
             font-family: 'Nikosh', 'Times New Roman', serif;
@@ -308,51 +308,78 @@ export function NewDashboard({
 
         /* Letterhead Design */
         #letterContent .header {
-            text-align: center;
-            border-bottom: 2px solid #000;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
             display: flex;
-            align-items: center;
-            gap: 10px; 
+            align-items: flex-start;
+            gap: 20px;
+            border-bottom: 2px solid #000;
+            padding: 8px 0;
+            margin: 0 0 10px 0;
             color: #1a5276;
         }
         
         #letterContent .header h3 {
             margin: 0; 
             font-weight: bold;
-            font-size: 1.3rem;
-            line-height: 1;
-            
+            font-size: 1.35rem;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+            min-width: 0;
         }
     
         #letterContent .header p {
             margin: 1px 0;
             font-size: 0.9rem;
         }
-    
-        #letterContent .header .contact-info {
-            margin-top: 3px;
-            font-size: 0.8rem;
-            color: #555;
-            border-top: 1px solid #eee;
-            display: inline-block;
-            padding-top: 3px;
-        }
         
         #letterContent .logo-img {
-          width: 65px;
+          width: 80px;
           height: auto;
+          flex-shrink: 0;
+          align-self: flex-start;
+        }
+        
+        #letterContent .header-text {
+          text-align: center;
+          min-width: 0;
+          overflow: hidden;
+          flex: 1;
+          align-self: center;
         }
         
         #letterContent .header-text h3, #letterContent .header-text p {
           margin: 0;
           padding: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        
+        #letterContent .header-text h3 {
+          font-size: 1.35rem;
+          font-weight: bold;
+          line-height: 1.2;
+        }
+        
+        #letterContent .header-text p {
+          font-size: 1rem;
+          margin-top: 2px;
         }
         
         #letterContent .contact-info {
           font-size: 0.9em;
-          margin-top: 5px;
+          line-height: 1.4;
+          text-align: right;
+          flex-shrink: 0;
+          align-self: center;
+          width: 220px;
+        }
+        
+        #letterContent .contact-info p {
+          margin: 2px 0;
+          white-space: nowrap;
         }
 
         /* Body Elements */
@@ -360,7 +387,7 @@ export function NewDashboard({
             display: flex;
             justify-content: space-between;
             font-weight: bold;
-            margin-bottom: 15px;
+            margin: 5px 0 12px 0;
             font-size: 14px;
         }
 
