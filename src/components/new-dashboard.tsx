@@ -36,12 +36,12 @@ export function NewDashboard({
       ? enToBn(new Date(inputs.inDate).toLocaleDateString('bn-BD'))
       : enToBn(new Date().toLocaleDateString('bn-BD'));
 
-  let pfStr = '0.0000';
+  let pfStr = '0.00';
   if (letterType === 'pf') {
     const kwh = parseFloat(inputs.ikwh) || 0;
     const tkvar = (parseFloat(inputs.ipeak) || 0) + (parseFloat(inputs.ioff) || 0);
     const pf = kwh / Math.sqrt(Math.pow(kwh, 2) + Math.pow(tkvar, 2));
-    pfStr = isNaN(pf) ? '0.0000' : pf.toFixed(4);
+    pfStr = isNaN(pf) ? '0.00' : pf.toFixed(2);
   }
 
   const completeLetterContent = (
@@ -66,8 +66,10 @@ export function NewDashboard({
   <div className="header-right">
     <p>সদর দপ্তর</p>
     <p>রাজেন্দ্রপুর, গাজীপুর</p>
-    <p>টেলিফোন: ০২-৯২৯৬৩১০</p>
-    <p>E-mail: gazipbs2@gmail.com</p>
+      <p>টেলিফোন: ০২-৯২৯৬৩১০</p>
+      <div className="contact-line">
+      <p>E-mail:gazipbs2@gmail.com</p>
+    </div>
   </div>
 </div>
 
@@ -317,69 +319,78 @@ export function NewDashboard({
             color: #1a5276;
         }
         
-        #letterContent .header h3 {
-            margin: 0; 
-            font-weight: bold;
-            font-size: 1.35rem;
-            line-height: 1.2;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-align: center;
-            min-width: 0;
-        }
-    
-        #letterContent .header p {
-            margin: 1px 0;
-            font-size: 0.9rem;
+        #letterContent .header-left {
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         
         #letterContent .logo-img {
-          width: 80px;
-          height: auto;
+          width: 75px;
+          height: 75px;
           flex-shrink: 0;
-          align-self: flex-start;
+          object-fit: contain;
         }
         
-        #letterContent .header-text {
-          text-align: center;
-          min-width: 0;
-          overflow: hidden;
+        #letterContent .header-center {
           flex: 1;
-          align-self: center;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 0 20px;
         }
         
-        #letterContent .header-text h3, #letterContent .header-text p {
+        #letterContent .header-center h2 {
+          margin: 0;
+          padding: 0;
+          font-size: 1.3rem;
+          font-weight: bold;
+          line-height: 1.4;
+          color: #1a5276;
+          letter-spacing: 0.5px;
+        }
+        
+        #letterContent .header-center p {
+          margin: 2px 0 0 0;
+          padding: 0;
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: #1a5276;
+          letter-spacing: 0.3px;
+        }
+        
+        #letterContent .header-right {
+          font-size: 0.8rem;
+          line-height: 1.5;
+          text-align: right;
+          flex-shrink: 0;
+          width: 210px;
+          color: #1a5276;
+        }
+        
+        #letterContent .header-right p {
+          margin: 2px 0;
+          padding: 0;
+          color: #1a5276;
+        }
+        
+        #letterContent .contact-line {
+          display: flex;
+          gap: 12px;
+          justify-content: flex-end;
+          align-items: center;
+          margin-top: 3px;
+        }
+        
+        #letterContent .contact-line p {
           margin: 0;
           padding: 0;
           white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-        
-        #letterContent .header-text h3 {
-          font-size: 1.35rem;
-          font-weight: bold;
-          line-height: 1.2;
-        }
-        
-        #letterContent .header-text p {
-          font-size: 1rem;
-          margin-top: 0;
-        }
-        
-        #letterContent .contact-info {
-          font-size: 0.9em;
-          line-height: 1.4;
-          text-align: right;
-          flex-shrink: 0;
-          align-self: center;
-          width: 220px;
-        }
-        
-        #letterContent .contact-info p {
-          margin: 2px 0;
-          white-space: nowrap;
+          color: #1a5276;
+          font-size: 0.8rem;
         }
 
         /* Body Elements */
