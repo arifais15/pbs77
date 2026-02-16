@@ -249,7 +249,7 @@ table, td, th {
 /* Right Contact */
 .header-right {
   text-align: right;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.15;
   flex-shrink: 0;
   min-width: 180px;
