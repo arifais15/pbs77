@@ -1,0 +1,311 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===============================
+   Font Configuration
+=============================== */
+@font-face {
+  font-family: 'SolaimanLipi';
+  src: url('https://fonts.gstatic.com/s/solaimanlipi/v0/0FlJvvnALIo8Zo8QJ7ZuLiZFXD9QJjCYf5Hf0vU7FzQ.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Nikosh';
+  src: url('https://fonts.gstatic.com/s/nikosh/v0/h09DYn9CUJKhEBKLlLmMGqRa1Jd0Z5ltg5Xw-qC55FI.woff2') format('woff2');
+}
+
+/* ===============================
+   Global Body
+=============================== */
+body {
+  font-family: 'Nikosh', 'SolaimanLipi', 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  margin: 0;
+}
+
+.bangla-text {
+  font-family: 'Nikosh', 'SolaimanLipi', sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: 0.5px;
+}
+
+/* ===============================
+   Heading Styles (Prevent Wrapping)
+=============================== */
+h1, h2, h3, h4, h5, h6 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* ===============================
+   Header (Official Style)
+=============================== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 30px;
+  background-color: white;
+  border-bottom: 3px solid black;
+}
+
+/* Left */
+.header-left {
+  width: 100px;
+}
+
+.logo-img {
+  width: 90px;
+  height: auto;
+  margin-top: 0;
+  margin-left: 0;
+}
+
+/* Center */
+.header-center {
+  text-align: center;
+  min-width: 0;
+  padding: 0 20px;
+}
+
+.header-center h2 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: bold;
+}
+
+.header-center p {
+  margin: 5px 0 0;
+  font-size: 26px;
+}
+
+/* Right */
+.header-right {
+  width: 100px;
+  text-align: right;
+  font-size: 14px;
+  line-height: 1.15;
+}
+
+.header-right p {
+  margin: 2px 0;
+}
+
+/* ===============================
+   Form Controls
+=============================== */
+input[type="text"],
+input[type="email"],
+textarea,
+select {
+  font-family: 'Nikosh', 'SolaimanLipi', inherit;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--ring)/0.4);
+}
+
+label {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+/* ===============================
+   Table Styling
+=============================== */
+table, td, th {
+  font-family: 'Nikosh', 'SolaimanLipi', inherit;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+/* ===============================
+   Print Styles (A4 Setup)
+=============================== */
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    width: 210mm;
+    height: 297mm;
+    margin: 0;
+    padding: 0;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .header {
+    background-color: white !important;
+    box-shadow: none !important;
+    margin: 0;
+    padding: 15px 40px 10px 40px;
+    border-bottom: 3px solid black;
+  }
+
+  #letterContent {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    border: none;
+  }
+
+  .no-print-area {
+    display: none !important;
+  }
+}
+
+/* ================= HEADER ================= */
+
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 40px;
+  border-bottom: 3px solid black;
+  background: white;
+  gap: 20px;
+}
+
+/* Left Logo */
+.header-left {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.logo-img {
+  width: 75px;
+  height: 75px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* Center Text */
+.header-center {
+  text-align: center;
+  min-width: 0;
+  overflow: visible;
+  padding: 0 15px;
+}
+
+.header-center h2 {
+  margin: 0;
+  padding: 0;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 1.3;
+}
+
+.header-center p {
+  margin: 5px 0 0 0;
+  padding: 0;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  line-height: 1.15;
+}
+
+/* Right Contact */
+.header-right {
+  text-align: right;
+  font-size: 14px;
+  line-height: 1.15;
+  flex-shrink: 0;
+  min-width: 180px;
+}
+
+.header-right p {
+  margin: 2px 0;
+  white-space: normal;
+}
+
+/* ===============================
+   Tailwind Variables & Dark Mode
+=============================== */
+@layer base {
+  :root {
+    --background: 209 33% 91%;
+    --foreground: 205 63% 15%;
+    --card: 209 33% 97%;
+    --card-foreground: 205 63% 15%;
+    --popover: 209 33% 97%;
+    --popover-foreground: 205 63% 15%;
+    --primary: 205 63% 28%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 209 33% 85%;
+    --secondary-foreground: 205 63% 28%;
+    --muted: 209 33% 85%;
+    --muted-foreground: 209 49% 30%;
+    --accent: 209 49% 40%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 209 33% 80%;
+    --input: 209 33% 88%;
+    --ring: 209 49% 40%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 205 63% 10%;
+    --foreground: 210 40% 96%;
+    --card: 205 63% 15%;
+    --card-foreground: 210 40% 96%;
+    --popover: 205 63% 10%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 205 63% 28%;
+    --secondary: 209 33% 25%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 209 33% 25%;
+    --muted-foreground: 209 40% 70%;
+    --accent: 209 49% 50%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 209 33% 25%;
+    --input: 209 33% 25%;
+    --ring: 209 49% 50%;
+  }
+}
