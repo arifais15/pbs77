@@ -1,0 +1,10 @@
+{
+  "name": "pbs77-root",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd Letter && npm ci --no-audit --no-fund && npm run build",
+    "dev": "cd Letter && npm run dev",
+    "start": "cd Letter && npm run start"
+  }
+}
